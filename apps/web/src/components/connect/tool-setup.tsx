@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, CopyIcon } from "@primer/octicons-react";
+import { Check as CheckIcon, Copy as CopyIcon } from "lucide-react";
 import { Box, BoxHeader, Button, Label, cn } from "@brandrail/ui";
 
 type Tool = { id: string; name: string; blurb: string; file: string; snippet: (url: string, slug: string) => string; connected?: boolean };

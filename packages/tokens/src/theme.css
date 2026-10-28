@@ -1,128 +1,119 @@
 /*
- * Brandrail base theme — semantic tokens.
- * Look & feel inspired by GitHub's Primer palette (neutral canvas, blue accent, green primary).
- * Light is default; dark follows the OS unless data-theme is set on <html>.
+ * Brandrail app theme — semantic tokens.
+ * Supabase-style: near-black greys, one green brand colour, quiet borders.
+ * Dark is the default (set by <html data-theme>); light is available from the user menu.
  */
 :root {
-  --br-canvas-default: #ffffff;
-  --br-canvas-subtle: #f6f8fa;
-  --br-canvas-inset: #f6f8fa;
+  /* light */
+  --br-canvas-default: #fcfcfc;
+  --br-surface: #ffffff;
+  --br-canvas-subtle: #f6f6f6;
+  --br-canvas-inset: #f1f1f1;
   --br-canvas-overlay: #ffffff;
-  --br-header-bg: #f6f8fa;
+  --br-header-bg: #fcfcfc;
+  --br-sidebar: #f8f8f8;
 
-  --br-fg-default: #1f2328;
-  --br-fg-muted: #59636e;
-  --br-fg-subtle: #818b98;
+  --br-fg-default: #171717;
+  --br-fg-muted: #636363;
+  --br-fg-subtle: #8f8f8f;
   --br-fg-on-emphasis: #ffffff;
 
-  --br-border-default: #d1d9e0;
-  --br-border-muted: #d1d9e0b3;
+  --br-border-default: #e2e2e2;
+  --br-border-muted: #ededed;
+  --br-border-strong: #cfcfcf;
 
-  --br-accent-fg: #0969da;
-  --br-accent-emphasis: #0969da;
-  --br-accent-subtle: #ddf4ff;
-  --br-accent-muted: #54aeff66;
+  --br-brand: #3ecf8e;
+  --br-accent-fg: #0b8a56;
+  --br-accent-emphasis: #3ecf8e;
+  --br-accent-subtle: #3ecf8e1f;
+  --br-accent-muted: #3ecf8e66;
 
-  --br-success-fg: #1a7f37;
-  --br-success-emphasis: #1f883d;
-  --br-success-emphasis-hover: #1c8139;
-  --br-success-subtle: #dafbe1;
+  --br-primary-bg: #3ecf8e;
+  --br-primary-hover: #36b97e;
+  --br-primary-border: #2fa874;
+  --br-primary-fg: #0b1f15;
 
-  --br-attention-fg: #9a6700;
-  --br-attention-subtle: #fff8c5;
+  --br-success-fg: #0b8a56;
+  --br-success-emphasis: #3ecf8e;
+  --br-success-emphasis-hover: #36b97e;
+  --br-success-subtle: #3ecf8e1f;
 
-  --br-danger-fg: #d1242f;
-  --br-danger-emphasis: #cf222e;
-  --br-danger-subtle: #ffebe9;
+  --br-attention-fg: #b26b00;
+  --br-attention-subtle: #ffb2241f;
 
-  --br-done-fg: #8250df;
-  --br-done-subtle: #fbefff;
+  --br-danger-fg: #d1333a;
+  --br-danger-emphasis: #e5484d;
+  --br-danger-subtle: #e5484d1a;
 
-  --br-btn-bg: #f6f8fa;
-  --br-btn-hover-bg: #eff2f5;
-  --br-btn-border: #d1d9e0;
+  --br-done-fg: #7c5cdb;
+  --br-done-subtle: #8b5cf61a;
 
-  --br-shadow-sm: 0 1px 0 #1f23280a;
-  --br-shadow-md: 0 3px 6px #25292e1f, 0 1px 3px #25292e14;
-  --br-shadow-lg: 0 8px 24px #42474e33;
+  --br-btn-bg: #ffffff;
+  --br-btn-hover-bg: #f3f3f3;
+  --br-btn-border: #dcdcdc;
+
+  --br-shadow-sm: 0 1px 2px #0000000d;
+  --br-shadow-md: 0 4px 12px #00000014;
+  --br-shadow-lg: 0 12px 32px #0000001f;
 
   --br-radius-sm: 4px;
   --br-radius-md: 6px;
   --br-radius-lg: 12px;
 
-  --br-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji";
+  --br-font-sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --br-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --br-canvas-default: #0d1117;
-    --br-canvas-subtle: #151b23;
-    --br-canvas-inset: #010409;
-    --br-canvas-overlay: #151b23;
-    --br-header-bg: #010409;
-    --br-fg-default: #f0f6fc;
-    --br-fg-muted: #9198a1;
-    --br-fg-subtle: #656c76;
-    --br-border-default: #3d444d;
-    --br-border-muted: #3d444db3;
-    --br-accent-fg: #4493f8;
-    --br-accent-emphasis: #1f6feb;
-    --br-accent-subtle: #388bfd1a;
-    --br-accent-muted: #388bfd66;
-    --br-success-fg: #3fb950;
-    --br-success-emphasis: #238636;
-    --br-success-emphasis-hover: #29903b;
-    --br-success-subtle: #2ea04326;
-    --br-attention-fg: #d29922;
-    --br-attention-subtle: #bb800926;
-    --br-danger-fg: #f85149;
-    --br-danger-emphasis: #da3633;
-    --br-danger-subtle: #f851491a;
-    --br-done-fg: #ab7df8;
-    --br-done-subtle: #ab7df826;
-    --br-btn-bg: #212830;
-    --br-btn-hover-bg: #262c36;
-    --br-btn-border: #3d444d;
-    --br-shadow-md: 0 3px 6px #010409cc;
-    --br-shadow-lg: 0 8px 24px #010409cc;
-    color-scheme: dark;
-  }
-}
-
 :root[data-theme="dark"] {
-  --br-canvas-default: #0d1117;
-  --br-canvas-subtle: #151b23;
-  --br-canvas-inset: #010409;
-  --br-canvas-overlay: #151b23;
-  --br-header-bg: #010409;
-  --br-fg-default: #f0f6fc;
-  --br-fg-muted: #9198a1;
-  --br-fg-subtle: #656c76;
-  --br-border-default: #3d444d;
-  --br-border-muted: #3d444db3;
-  --br-accent-fg: #4493f8;
-  --br-accent-emphasis: #1f6feb;
-  --br-accent-subtle: #388bfd1a;
-  --br-accent-muted: #388bfd66;
-  --br-success-fg: #3fb950;
-  --br-success-emphasis: #238636;
-  --br-success-emphasis-hover: #29903b;
-  --br-success-subtle: #2ea04326;
-  --br-attention-fg: #d29922;
-  --br-attention-subtle: #bb800926;
-  --br-danger-fg: #f85149;
-  --br-danger-emphasis: #da3633;
-  --br-danger-subtle: #f851491a;
-  --br-done-fg: #ab7df8;
-  --br-done-subtle: #ab7df826;
-  --br-btn-bg: #212830;
-  --br-btn-hover-bg: #262c36;
-  --br-btn-border: #3d444d;
-  --br-shadow-md: 0 3px 6px #010409cc;
-  --br-shadow-lg: 0 8px 24px #010409cc;
+  --br-canvas-default: #121212;
+  --br-surface: #1a1a1a;
+  --br-canvas-subtle: #202020;
+  --br-canvas-inset: #0e0e0e;
+  --br-canvas-overlay: #1c1c1c;
+  --br-header-bg: #121212;
+  --br-sidebar: #151515;
+
+  --br-fg-default: #ededed;
+  --br-fg-muted: #a0a0a0;
+  --br-fg-subtle: #6f6f6f;
+
+  --br-border-default: #2e2e2e;
+  --br-border-muted: #242424;
+  --br-border-strong: #3e3e3e;
+
+  --br-accent-fg: #3ecf8e;
+  --br-accent-emphasis: #3ecf8e;
+  --br-accent-subtle: #3ecf8e1a;
+  --br-accent-muted: #3ecf8e4d;
+
+  --br-primary-bg: #006239;
+  --br-primary-hover: #00703f;
+  --br-primary-border: #3ecf8e80;
+  --br-primary-fg: #fafafa;
+
+  --br-success-fg: #3ecf8e;
+  --br-success-emphasis: #3ecf8e;
+  --br-success-emphasis-hover: #36b97e;
+  --br-success-subtle: #3ecf8e1a;
+
+  --br-attention-fg: #ffb224;
+  --br-attention-subtle: #ffb2241a;
+
+  --br-danger-fg: #ff6369;
+  --br-danger-emphasis: #e5484d;
+  --br-danger-subtle: #e5484d1f;
+
+  --br-done-fg: #a78bfa;
+  --br-done-subtle: #a78bfa1f;
+
+  --br-btn-bg: #1f1f1f;
+  --br-btn-hover-bg: #282828;
+  --br-btn-border: #363636;
+
+  --br-shadow-sm: 0 1px 2px #00000066;
+  --br-shadow-md: 0 4px 12px #00000080;
+  --br-shadow-lg: 0 12px 32px #000000a6;
   color-scheme: dark;
 }

@@ -1,4 +1,4 @@
-import { CheckCircleFillIcon, DotFillIcon, XCircleFillIcon, ClockIcon } from "@primer/octicons-react";
+import { CircleCheck as CheckCircleFillIcon, CircleDot as DotFillIcon, CircleX as XCircleFillIcon, Clock as ClockIcon } from "lucide-react";
 import type { ScanStatus } from "@/lib/mock";
 
 export function ScanStatusIcon({ status, size = 16 }: { status: ScanStatus; size?: number }) {

@@ -3,7 +3,7 @@ import { cn } from "./cn";
 
 /* ---------- Box / Card ---------- */
 export function Box({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-md border border-line bg-canvas", className)} {...props} />;
+  return <div className={cn("rounded-md border border-line bg-surface", className)} {...props} />;
 }
 
 export function BoxHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

@@ -1,30 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
-  CopyIcon,
-  CheckIcon,
-  DownloadIcon,
-  UploadIcon,
-  DeviceDesktopIcon,
-  DeviceMobileIcon,
-  MoonIcon,
-  SunIcon,
-} from "@primer/octicons-react";
+  Copy as CopyIcon,
+  Check as CheckIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
+  Monitor as DeviceDesktopIcon,
+  Smartphone as DeviceMobileIcon,
+  Moon as MoonIcon,
+  Sun as SunIcon,
+} from "lucide-react";
 import { Box, BoxHeader, Button, Flash, Label, Select, TextInput, cn } from "@brandrail/ui";
-
-type ColorToken = { path: string; value: string; note: string };
-
-const initialColors: ColorToken[] = [
-  { path: "color.action.primary", value: "#1f883d", note: "One primary action per view" },
-  { path: "color.accent.default", value: "#0969da", note: "Links, focus, selection" },
-  { path: "color.fg.default", value: "#1f2328", note: "Body text" },
-  { path: "color.fg.muted", value: "#59636e", note: "Secondary text" },
-  { path: "color.canvas.default", value: "#ffffff", note: "Page background" },
-  { path: "color.canvas.subtle", value: "#f6f8fa", note: "Headers, wells" },
-  { path: "color.border.default", value: "#d1d9e0", note: "Borders and dividers" },
-  { path: "color.danger.default", value: "#cf222e", note: "Destructive actions, errors" },
-];
+import { publishBrandKitAction, type PublishResult } from "@/app/actions/brand-kit";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { nextVersion, type BrandKitState } from "@/lib/brand-kit";
 
 const fonts = [
   { label: "System (GitHub style)", value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" },
@@ -51,21 +41,41 @@ function contrast(a: string, b: string) {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 
-export function BrandKitEditor({ orgName }: { orgName: string }) {
+export function BrandKitEditor({
+  orgName,
+  initial,
+  version,
+  publishedAt,
+  canPublish,
+}: {
+  orgName: string;
+  initial: BrandKitState;
+  version: string | null;
+  publishedAt: string | null;
+  canPublish: boolean;
+}) {
   const [section, setSection] = useState<Section>("Colours");
-  const [colors, setColors] = useState(initialColors);
-  const [font, setFont] = useState(fonts[0]!.value);
-  const [baseSize, setBaseSize] = useState(14);
-  const [radius, setRadius] = useState(6);
-  const [spaceUnit, setSpaceUnit] = useState(8);
+  const [colors, setColors] = useState(initial.colors);
+  const [font, setFont] = useState(initial.font);
+  const [baseSize, setBaseSize] = useState(initial.baseSize);
+  const [radius, setRadius] = useState(initial.radius);
+  const [spaceUnit, setSpaceUnit] = useState(initial.spaceUnit);
+  const [result, setResult] = useState<PublishResult | null>(null);
+  const [pending, startTransition] = useTransition();
   const [dark, setDark] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [exportFormat, setExportFormat] = useState<"css" | "tailwind" | "json">("css");
   const [copied, setCopied] = useState(false);
-  const [published, setPublished] = useState(false);
 
   const get = (p: string) => colors.find((c) => c.path === p)?.value ?? "#000000";
-  const dirty = JSON.stringify(colors) !== JSON.stringify(initialColors) || radius !== 6 || baseSize !== 14 || spaceUnit !== 8 || font !== fonts[0]!.value;
+  const current: BrandKitState = { colors, font, baseSize, radius, spaceUnit };
+  const dirty = JSON.stringify(current) !== JSON.stringify(initial);
+  const upcoming = nextVersion(version);
+  const fontOptions = fonts.some((f) => f.value === font) ? fonts : [{ label: "Custom", value: font }, ...fonts];
+  const publish = () =>
+    startTransition(async () => {
+      setResult(await publishBrandKitAction(current));
+    });
 
   const previewVars = useMemo(() => {
     const v: Record<string, string> = {};
@@ -112,33 +122,38 @@ export function BrandKitEditor({ orgName }: { orgName: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold text-fg">Brand Kit</h1>
-            <Label tone="success">v1.4.0 published</Label>
-            {dirty && !published && <Label tone="attention">Unpublished changes</Label>}
-          </div>
-          <p className="mt-1 text-fg-muted">The tokens every AI tool and every check in {orgName} follows.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button leadingIcon={<UploadIcon size={16} />}>Import from Figma</Button>
-          <Button
-            variant="primary"
-            disabled={!dirty || published}
-            onClick={() => setPublished(true)}
-          >
-            {published ? "Published v1.5.0" : "Publish v1.5.0"}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Brand Kit"
+        badge={
+          <>
+            {version ? <Label tone="success">v{version} published</Label> : <Label>Not published yet</Label>}
+            {dirty && <Label tone="attention">Unpublished changes</Label>}
+          </>
+        }
+        description={
+          <>
+            The tokens every AI tool and every check in {orgName} follows.
+            {publishedAt && <> Last published {new Date(publishedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}.</>}
+          </>
+        }
+        actions={
+          <>
+            <Button leadingIcon={<UploadIcon size={14} />} disabled title="Coming soon">Import from Figma</Button>
+            <Button variant="primary" disabled={!dirty || pending || !canPublish} onClick={publish} aria-busy={pending}>
+              {pending ? "Publishing…" : `Publish v${upcoming}`}
+            </Button>
+          </>
+        }
+      />
 
-      {published && (
+      {result?.ok && (
         <Flash tone="success">
-          v1.5.0 is live. The MCP server and the next CI run will use it. (Demo: saving to the database comes next.)
+          v{result.version} is live. The MCP server and the next CI run will use it.
+          {result.demo && " (Demo mode: nothing was saved. Connect Supabase to keep versions.)"}
         </Flash>
       )}
+      {result && !result.ok && <Flash tone="danger">{result.error}</Flash>}
+      {!canPublish && <Flash tone="attention">You can edit and preview, but only owners and admins can publish.</Flash>}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         {/* Editor */}
@@ -209,7 +224,7 @@ export function BrandKitEditor({ orgName }: { orgName: string }) {
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="font" className="text-sm font-semibold text-fg">Font family</label>
                   <Select id="font" value={font} onChange={(e) => setFont(e.target.value)}>
-                    {fonts.map((f) => (
+                    {fontOptions.map((f) => (
                       <option key={f.label} value={f.value}>{f.label}</option>
                     ))}
                   </Select>

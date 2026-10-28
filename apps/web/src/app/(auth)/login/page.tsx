@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Box } from "@brandrail/ui";
+import { AuthCard } from "@/components/auth/auth-card";
 import { LoginForm } from "@/components/auth/login-form";
 import { Divider, OAuthButtons } from "@/components/auth/oauth-buttons";
 
@@ -11,19 +11,21 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
   return (
-    <>
-      <h1 className="mb-4 text-center text-2xl font-light tracking-tight text-fg">Sign in to Brandrail</h1>
-      <Box className="bg-canvas-subtle p-4">
-        <LoginForm next={safeNext} initialError={error} />
-        <Divider />
-        <OAuthButtons next={safeNext} />
-      </Box>
-      <Box className="mt-4 p-4 text-center text-sm">
-        New to Brandrail?{" "}
-        <Link href="/signup" className="text-accent hover:underline">
-          Create an account
-        </Link>
-      </Box>
-    </>
+    <AuthCard
+      title="Welcome back"
+      subtitle="Sign in to your Brandrail account"
+      footer={
+        <>
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="font-medium text-fg underline-offset-4 hover:underline">
+            Sign up
+          </Link>
+        </>
+      }
+    >
+      <OAuthButtons next={safeNext} />
+      <Divider />
+      <LoginForm next={safeNext} initialError={error} />
+    </AuthCard>
   );
 }

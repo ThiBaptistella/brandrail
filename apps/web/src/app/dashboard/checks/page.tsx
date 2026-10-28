@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { GlobeIcon, GitPullRequestIcon, TerminalIcon, CopilotIcon, ClockIcon } from "@primer/octicons-react";
+import { Globe as GlobeIcon, GitPullRequest as GitPullRequestIcon, Terminal as TerminalIcon, Bot as CopilotIcon, Clock as ClockIcon } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { SampleDataBadge } from "@/components/dashboard/sample-data";
 import { Box, BoxHeader, Button, Flash, Label, TextInput } from "@brandrail/ui";
 import { ScanStatusIcon } from "@/components/dashboard/scan-status";
 import { scoreTone } from "@/components/dashboard/sparkline";
@@ -21,12 +23,7 @@ export default async function ChecksPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-fg">Checks</h1>
-          <p className="mt-1 text-fg-muted">Every scan from pull requests, the CLI, AI tools and live URLs.</p>
-        </div>
-      </div>
+      <PageHeader title="Checks" badge={<SampleDataBadge />} description="Every scan from pull requests, the CLI, AI tools and live URLs." />
 
       <Box id="scan-url" className={showNew ? "ring-2 ring-accent-emphasis/40" : ""}>
         <BoxHeader>

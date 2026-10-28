@@ -5,6 +5,14 @@
 
 @theme inline {
   --color-canvas: var(--br-canvas-default);
+  --color-surface: var(--br-surface);
+  --color-sidebar: var(--br-sidebar);
+  --color-brand: var(--br-brand);
+  --color-line-strong: var(--br-border-strong);
+  --color-primary: var(--br-primary-bg);
+  --color-primary-hover: var(--br-primary-hover);
+  --color-primary-border: var(--br-primary-border);
+  --color-on-primary: var(--br-primary-fg);
   --color-canvas-subtle: var(--br-canvas-subtle);
   --color-canvas-inset: var(--br-canvas-inset);
   --color-overlay: var(--br-canvas-overlay);
@@ -74,6 +82,12 @@
   --br-accent-fg: #4493f8;
   --br-success-emphasis: #238636;
   --br-success-emphasis-hover: #29903b;
+  --br-primary-bg: #238636;
+  --br-primary-hover: #29903b;
+  --br-primary-border: #ffffff1a;
+  --br-primary-fg: #ffffff;
+  --br-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  font-family: var(--br-font-sans);
   color-scheme: dark;
   background: #0d1117;
   color: #f0f6fc;

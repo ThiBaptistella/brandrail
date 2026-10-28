@@ -12,13 +12,16 @@ pnpm dev            # http://localhost:3000
 With no Supabase keys the app runs in **demo mode**: any email/password signs you in, nothing is stored,
 and the dashboard shows sample data. A yellow banner tells you when you're in demo mode.
 
-## Going live with Supabase
+## Supabase
 
-1. Create a Supabase project (region: Sydney).
-2. Run `supabase/migrations/20261028000000_init.sql` (SQL editor or `supabase db push`).
-3. Auth → URL configuration: add `http://localhost:3000/auth/callback` (and your prod URL) as redirect URLs.
-4. Auth → Providers: enable GitHub and Google if you want OAuth.
-5. Copy `apps/web/.env.example` to `apps/web/.env.local` and fill in the URL and anon key.
+Project `brandrail` (ref `cyxytcoswgwgzaonkpnf`). Both migrations in `supabase/migrations/` are already applied;
+the file names match the versions recorded in Supabase, so the GitHub integration won't re-run them.
+`apps/web/.env.local` holds the URL and publishable key (git-ignored).
+
+Still to do in the Supabase dashboard:
+1. Auth → URL Configuration: Site URL `http://localhost:3000`, and add `http://localhost:3000/**` to Redirect URLs.
+2. Auth → Providers: enable GitHub and Google if you want OAuth (each needs an OAuth app's client ID/secret).
+3. For quick local testing you can turn off "Confirm email" under Auth → Providers → Email.
 
 ## Structure
 

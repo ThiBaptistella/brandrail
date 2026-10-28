@@ -1,10 +1,12 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Flash, FormControl, TextInput } from "@brandrail/ui";
+import { ArrowRight } from "lucide-react";
+import { Flash, FormControl, TextInput, cn } from "@brandrail/ui";
 import { createOrganizationAction } from "@/app/actions/org";
 import type { FormState } from "@/app/actions/auth";
 import { SubmitButton } from "./auth/submit-button";
+import { authInput } from "./auth/auth-card";
 
 const slugify = (s: string) =>
   s
@@ -22,13 +24,14 @@ export function OnboardingForm() {
   return (
     <form action={action} className="flex flex-col gap-5" noValidate>
       {state.error && <Flash tone="danger">{state.error}</Flash>}
-      <FormControl label="Organisation name" htmlFor="name" required caption="Usually your company or brand name.">
+      <FormControl label="Organisation name" htmlFor="name" caption="Usually your company or brand name.">
         <TextInput
           id="name"
           name="name"
           autoFocus
           required
           placeholder="Acme Mining"
+          className={authInput}
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -36,33 +39,26 @@ export function OnboardingForm() {
           }}
         />
       </FormControl>
-      <FormControl
-        label="Organisation URL"
-        htmlFor="slug"
-        required
-        caption={
-          <>
-            brandrail.dev/<strong className="text-fg">{slug || "your-org"}</strong>
-          </>
-        }
-      >
-        <TextInput
-          id="slug"
-          name="slug"
-          required
-          className="font-mono"
-          value={slug}
-          onChange={(e) => {
-            setSlugTouched(true);
-            setSlug(slugify(e.target.value));
-          }}
-        />
+      <FormControl label="Organisation URL" htmlFor="slug">
+        <div className="flex items-stretch overflow-hidden rounded-md border border-btn-border bg-canvas-subtle focus-within:border-accent-emphasis focus-within:ring-2 focus-within:ring-accent-emphasis/25">
+          <span className="flex items-center border-r border-btn-border px-3 text-sm text-fg-subtle">brandrail.dev/</span>
+          <input
+            id="slug"
+            name="slug"
+            required
+            className={cn("w-full bg-transparent font-mono text-sm text-fg outline-none", authInput)}
+            value={slug}
+            placeholder="acme-mining"
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(slugify(e.target.value));
+            }}
+          />
+        </div>
       </FormControl>
-      <div className="flex items-center justify-end gap-3 border-t border-line pt-5">
-        <SubmitButton variant="primary" pendingText="Creating…">
-          Create organisation
-        </SubmitButton>
-      </div>
+      <SubmitButton variant="primary" size="xl" block pendingText="Creating…" className="mt-2" trailingIcon={<ArrowRight size={16} />}>
+        Create organisation
+      </SubmitButton>
     </form>
   );
 }

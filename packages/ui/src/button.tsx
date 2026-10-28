@@ -2,13 +2,13 @@ import * as React from "react";
 import { cn } from "./cn";
 
 export type ButtonVariant = "default" | "primary" | "danger" | "invisible" | "outline";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 const variants: Record<ButtonVariant, string> = {
   default:
     "bg-btn text-fg border-btn-border hover:bg-btn-hover shadow-[var(--br-shadow-sm)]",
   primary:
-    "bg-success-emphasis text-on-emphasis border-black/10 hover:bg-success-hover shadow-[var(--br-shadow-sm)]",
+    "bg-primary text-on-primary border-primary-border hover:bg-primary-hover shadow-[var(--br-shadow-sm)]",
   danger:
     "bg-btn text-danger border-btn-border hover:bg-danger-emphasis hover:text-on-emphasis hover:border-transparent",
   invisible: "bg-transparent text-fg border-transparent hover:bg-btn-hover",
@@ -16,9 +16,10 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-7 px-3 text-xs gap-1",
-  md: "h-8 px-3 text-sm gap-2",
-  lg: "h-10 px-4 text-base gap-2",
+  sm: "h-7 px-2.5 text-xs gap-1.5",
+  md: "h-8 px-3 text-[13px] gap-2",
+  lg: "h-10 px-4 text-sm gap-2",
+  xl: "h-11 px-5 text-[15px] gap-2.5",
 };
 
 export function buttonClasses(variant: ButtonVariant = "default", size: ButtonSize = "md", block = false) {

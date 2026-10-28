@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { KeyIcon, ServerIcon, WorkflowIcon } from "@primer/octicons-react";
+import { KeyRound as KeyIcon, Server as ServerIcon, Workflow as WorkflowIcon } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { Box, BoxHeader, BoxRow, Button, Label } from "@brandrail/ui";
 import { ToolSetup } from "@/components/connect/tool-setup";
 import { requireOrg } from "@/lib/session";
@@ -40,10 +41,7 @@ export default async function ConnectPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="border-b border-line pb-4">
-        <h1 className="text-2xl font-semibold text-fg">Connect</h1>
-        <p className="mt-1 text-fg-muted">Put the Guardrail inside every AI tool and the Checker inside every pipeline.</p>
-      </div>
+      <PageHeader title="Connect" description="Put the Guardrail inside every AI tool and the Checker inside every pipeline." />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="flex min-w-0 flex-col gap-6">

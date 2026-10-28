@@ -2,10 +2,10 @@ import * as React from "react";
 import { cn } from "./cn";
 
 export const inputClasses = cn(
-  "block w-full h-8 rounded-md border border-line bg-canvas px-3 text-sm text-fg",
-  "placeholder:text-fg-subtle shadow-[inset_0_1px_0_rgba(208,215,222,0.2)]",
-  "focus:outline-none focus:border-accent-emphasis focus:ring-2 focus:ring-accent-emphasis/30",
-  "disabled:bg-canvas-subtle disabled:text-fg-muted",
+  "block w-full h-9 rounded-md border border-btn-border bg-canvas-subtle px-3 text-sm text-fg",
+  "placeholder:text-fg-subtle transition-colors",
+  "hover:border-line-strong focus:outline-none focus:border-accent-emphasis focus:ring-2 focus:ring-accent-emphasis/25",
+  "disabled:opacity-60 disabled:text-fg-muted",
 );
 
 export const TextInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
@@ -38,9 +38,9 @@ export interface FormControlProps {
 
 export function FormControl({ label, htmlFor, caption, error, required, trailing, children }: FormControlProps) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <label htmlFor={htmlFor} className="text-sm font-semibold text-fg">
+        <label htmlFor={htmlFor} className="text-sm font-medium text-fg">
           {label}
           {required && <span className="text-danger"> *</span>}
         </label>

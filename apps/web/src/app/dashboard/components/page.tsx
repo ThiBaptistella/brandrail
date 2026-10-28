@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { PackageIcon, SyncIcon, SearchIcon } from "@primer/octicons-react";
+import { Package as PackageIcon, RefreshCw as SyncIcon, Search as SearchIcon } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { Box, BoxHeader, Button, Label, TextInput, type LabelTone } from "@brandrail/ui";
 import { registryComponents } from "@/lib/mock";
 import { KitGallery } from "@/components/kit-gallery";
@@ -11,18 +12,16 @@ const statusTone: Record<string, LabelTone> = { stable: "success", beta: "accent
 export default function ComponentsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-fg">Component registry</h1>
-          <p className="mt-1 text-fg-muted">
-            The components AI tools must use. <code className="font-mono text-sm">find_component</code> answers from this list.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button leadingIcon={<SyncIcon size={16} />}>Sync from Storybook</Button>
-          <Button variant="primary">Add component</Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Components"
+        description={<>The components AI tools must use. <code className="font-mono">find_component</code> answers from this registry.</>}
+        actions={
+          <>
+            <Button leadingIcon={<SyncIcon size={14} />}>Sync from Storybook</Button>
+            <Button variant="primary">Add component</Button>
+          </>
+        }
+      />
 
       <KitGallery />
 

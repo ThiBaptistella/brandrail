@@ -2,15 +2,15 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  AlertIcon,
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  FileCodeIcon,
-  InfoIcon,
-  LightBulbIcon,
-  StopIcon,
-  XCircleIcon,
-} from "@primer/octicons-react";
+  TriangleAlert as AlertIcon,
+  ArrowLeft as ArrowLeftIcon,
+  CircleCheck as CheckCircleIcon,
+  FileCode as FileCodeIcon,
+  Info as InfoIcon,
+  Lightbulb as LightBulbIcon,
+  OctagonX as StopIcon,
+  CircleX as XCircleIcon,
+} from "lucide-react";
 import { Blankslate, Box, BoxHeader, Button, Label } from "@brandrail/ui";
 import { ScanStatusIcon } from "@/components/dashboard/scan-status";
 import { scoreTone } from "@/components/dashboard/sparkline";
@@ -43,7 +43,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
         <ArrowLeftIcon size={16} /> All checks
       </Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
         <div>
           <h1 className="text-2xl font-normal text-fg">
             {scan.title} <span className="text-fg-muted">{scan.ref}</span>

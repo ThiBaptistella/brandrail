@@ -11,6 +11,7 @@ import {
 } from "@primer/octicons-react";
 import { buttonClasses } from "@brandrail/ui";
 import { Logo } from "@/components/logo";
+import { SiteFooter } from "@/components/site-footer";
 import { getUser } from "@/lib/session";
 
 export default async function HomePage() {
@@ -243,12 +244,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-white/10">
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-[#9198a1] md:flex-row md:px-8">
-          <span className="[--logo-ink:#0d1117] text-white"><Logo /></span>
-          <span>© {new Date().getFullYear()} Brandrail. Built in Perth.</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
