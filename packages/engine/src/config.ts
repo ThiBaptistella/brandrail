@@ -1,7 +1,7 @@
 import { parseColor, rgbToLab, toHex, type Lab } from "./color.ts";
 import type { BrandrailConfig, ComponentEntry, DtcgDoc, RuleSetting } from "./types.ts";
 
-export type TokenColor = { path: string; cssVar: string; hex: string; lab: Lab };
+export type TokenColor = { path: string; cssVar: string; hex: string; lab: Lab; alpha: number; /** Set on the extra entry for a dark-mode value. */ mode?: "dark" };
 
 export interface ResolvedConfig {
   tokenVersion?: string;
@@ -12,6 +12,8 @@ export interface ResolvedConfig {
   radii: number[];
   /** Allowed first font families, lower-cased, quotes removed. */
   fonts: string[];
+  /** CSS variables of the font family tokens, e.g. --font-family-sans. */
+  fontVars: string[];
   components: ComponentEntry[];
   /** html tag (or tag[type=x]) -> component that replaces it */
   replaces: Map<string, ComponentEntry>;
@@ -89,13 +91,14 @@ const GENERIC_FONTS = new Set([
   "fantasy",
 ]);
 
-type Leaf = { path: string; type?: string; value: unknown };
+type Leaf = { path: string; type?: string; value: unknown; dark?: unknown };
 
 function leaves(doc: unknown, prefix = "", out: Leaf[] = []): Leaf[] {
   if (!doc || typeof doc !== "object") return out;
   const obj = doc as Record<string, unknown>;
   if ("$value" in obj) {
-    out.push({ path: prefix, type: obj.$type as string | undefined, value: obj.$value });
+    const ext = (obj.$extensions as Record<string, { modes?: { dark?: unknown } }> | undefined)?.["dev.brandrail"];
+    out.push({ path: prefix, type: obj.$type as string | undefined, value: obj.$value, dark: ext?.modes?.dark });
     return out;
   }
   for (const [k, v] of Object.entries(obj)) {
@@ -135,7 +138,10 @@ export function resolveConfig(config: BrandrailConfig): ResolvedConfig {
     if (!l.type && !l.path.startsWith("color")) continue;
     const rgb = parseColor(l.value);
     if (!rgb) continue;
-    colors.push({ path: l.path, cssVar: `--${l.path.replace(/\./g, "-")}`, hex: toHex(rgb), lab: rgbToLab(rgb) });
+    const cssVar = `--${l.path.replace(/\./g, "-")}`;
+    colors.push({ path: l.path, cssVar, hex: toHex(rgb), lab: rgbToLab(rgb), alpha: rgb.a });
+    const dark = typeof l.dark === "string" ? parseColor(l.dark) : null;
+    if (dark) colors.push({ path: l.path, cssVar, hex: toHex(dark), lab: rgbToLab(dark), alpha: dark.a, mode: "dark" });
   }
 
   // Spacing: explicit space.* tokens, plus a scale from space.unit if present.
@@ -155,9 +161,9 @@ export function resolveConfig(config: BrandrailConfig): ResolvedConfig {
   if (radiusVals.length === 1) radii.push(Math.round(radiusVals[0]! / 2), radiusVals[0]! * 2);
   if (radiusVals.length === 0) radii.push(2, 4, 6, 8, 12, 16);
 
-  const fonts = all
-    .filter((l) => (l.type === "fontFamily" || /^font\.family\./.test(l.path)) && typeof l.value === "string")
-    .map((l) => normalizeFontFamily(l.value as string));
+  const fontLeaves = all.filter((l) => (l.type === "fontFamily" || /^font\.family\./.test(l.path)) && typeof l.value === "string");
+  const fonts = fontLeaves.map((l) => normalizeFontFamily(l.value as string));
+  const fontVars = fontLeaves.map((l) => `--${l.path.replace(/\./g, "-")}`);
 
   const components = config.components ?? [];
   const replaces = new Map<string, ComponentEntry>();
@@ -175,6 +181,7 @@ export function resolveConfig(config: BrandrailConfig): ResolvedConfig {
     spacing: uniqSorted(spacing),
     radii: uniqSorted(radii),
     fonts: [...new Set(fonts)],
+    fontVars: fontVars.length ? fontVars : ["--font-family-sans"],
     components,
     replaces,
     rules: (config.rules ?? {}) as Record<string, RuleSetting>,

@@ -22,12 +22,13 @@ export interface McpContext {
   record?: (report: Report, meta: { filename: string; project?: string }) => Promise<void>;
 }
 
-type Leaf = { path: string; type?: string; value: unknown; description?: string };
+type Leaf = { path: string; type?: string; value: unknown; description?: string; dark?: unknown };
 function leaves(doc: unknown, prefix = "", out: Leaf[] = []): Leaf[] {
   if (!doc || typeof doc !== "object") return out;
   const o = doc as Record<string, unknown>;
   if ("$value" in o) {
-    out.push({ path: prefix, type: o.$type as string | undefined, value: o.$value, description: o.$description as string | undefined });
+    const ext = (o.$extensions as Record<string, { modes?: { dark?: unknown } }> | undefined)?.["dev.brandrail"];
+    out.push({ path: prefix, type: o.$type as string | undefined, value: o.$value, description: o.$description as string | undefined, dark: ext?.modes?.dark });
     return out;
   }
   for (const [k, v] of Object.entries(o)) if (!k.startsWith("$")) leaves(v, prefix ? `${prefix}.${k}` : k, out);
@@ -90,7 +91,8 @@ export function createBrandrailMcp(ctx: McpContext): McpServer {
       const pick = category === "all" ? all : all.filter(CATEGORY[category]!);
       const lines = [`# ${ctx.org} design tokens${ctx.config.tokenVersion ? ` (Brand Kit v${ctx.config.tokenVersion})` : ""}`, ""];
       lines.push("| Token | Use | Value | Meaning |", "| --- | --- | --- | --- |");
-      for (const l of pick) lines.push(`| ${l.path} | \`${cssVar(l.path)}\` | ${String(l.value)} | ${l.description ?? ""} |`);
+      for (const l of pick) lines.push(`| ${l.path} | \`${cssVar(l.path)}\` | ${String(l.value)}${l.dark ? ` (dark ${String(l.dark)})` : ""} | ${l.description ?? ""} |`);
+      if (pick.some((l) => l.dark)) lines.push("", "Colours with a dark value switch automatically: always use the variable, never the hex, so both themes work.");
       if (category === "all" || category === "spacing") lines.push("", `Allowed spacing (px): ${resolved.spacing.filter((s) => s > 2).join(", ")}`);
       if (category === "all" || category === "radius") lines.push(`Allowed radius (px): ${resolved.radii.filter((r) => r > 0 && r < 999).join(", ")}`);
       return text(lines.join("\n") + kitNote);

@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/env";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Bot, Clock, Globe, GitPullRequest, Terminal } from "lucide-react";
@@ -28,7 +29,7 @@ function FirstScan() {
           Create an API key in <Link href="/dashboard/connect" className="text-accent hover:underline">Connect</Link>, then in your project:
         </p>
         <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-canvas-inset p-3 font-mono text-xs leading-5 text-fg">{`export BRANDRAIL_KEY=br_live_…
-export BRANDRAIL_API_URL=http://localhost:3000
+export BRANDRAIL_API_URL=${SITE_URL}
 npx brandrail init --from-api
 npx brandrail check --upload`}</pre>
       </div>

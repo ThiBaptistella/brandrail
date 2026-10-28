@@ -10,3 +10,27 @@ export { generateInstructions, upsertSection, RULES_START, RULES_END } from "./i
 export { findComponents, findComponentByName, type ComponentMatch } from "./components.ts";
 export type { TokenColor } from "./config.ts";
 export { mcpClientConfigs, RULE_FILES, type McpClientConfig } from "./mcp-config.ts";
+export {
+  importTokens,
+  fromFigmaVariables,
+  fromFigmaStyles,
+  fromModeObject,
+  flattenTokens,
+  buildDtcg,
+  diffTokens,
+  mergeTokens,
+  classify,
+  slug,
+  fontWeight,
+  EXT as TOKEN_EXTENSION,
+  type FlatToken,
+  type TokenType,
+  type ImportResult,
+  type ImportFormat,
+  type ImportOptions,
+  type TokenDiff,
+  type FigmaVariablesMeta,
+  type FigmaVariable,
+  type FigmaCollection,
+  type FigmaStyleNode,
+} from "./tokens.ts";

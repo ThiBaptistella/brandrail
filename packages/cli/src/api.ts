@@ -1,6 +1,7 @@
 import type { BrandrailConfig, Report } from "@brandrail/engine";
 
-export const DEFAULT_API = "http://localhost:3000";
+/** The hosted Brandrail. Point BRANDRAIL_API_URL at http://localhost:3000 when running the web app locally. */
+export const DEFAULT_API = "https://web-phi-nine-77.vercel.app";
 
 export function apiBase(): string {
   return (process.env.BRANDRAIL_API_URL ?? DEFAULT_API).replace(/\/$/, "");

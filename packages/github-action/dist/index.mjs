@@ -128,7 +128,8 @@ function leaves(doc, prefix = "", out = []) {
   if (!doc || typeof doc !== "object") return out;
   const obj = doc;
   if ("$value" in obj) {
-    out.push({ path: prefix, type: obj.$type, value: obj.$value });
+    const ext = obj.$extensions?.["dev.brandrail"];
+    out.push({ path: prefix, type: obj.$type, value: obj.$value, dark: ext?.modes?.dark });
     return out;
   }
   for (const [k, v] of Object.entries(obj)) {
@@ -162,7 +163,10 @@ function resolveConfig(config) {
     if (!l.type && !l.path.startsWith("color")) continue;
     const rgb = parseColor(l.value);
     if (!rgb) continue;
-    colors.push({ path: l.path, cssVar: `--${l.path.replace(/\./g, "-")}`, hex: toHex(rgb), lab: rgbToLab(rgb) });
+    const cssVar = `--${l.path.replace(/\./g, "-")}`;
+    colors.push({ path: l.path, cssVar, hex: toHex(rgb), lab: rgbToLab(rgb), alpha: rgb.a });
+    const dark = typeof l.dark === "string" ? parseColor(l.dark) : null;
+    if (dark) colors.push({ path: l.path, cssVar, hex: toHex(dark), lab: rgbToLab(dark), alpha: dark.a, mode: "dark" });
   }
   const spaceLeaves = all.filter((l) => /^(space|spacing)\./.test(l.path));
   const spacing = [0, 1, 2];
@@ -177,7 +181,9 @@ function resolveConfig(config) {
   const radii = [0, 9999, ...radiusVals];
   if (radiusVals.length === 1) radii.push(Math.round(radiusVals[0] / 2), radiusVals[0] * 2);
   if (radiusVals.length === 0) radii.push(2, 4, 6, 8, 12, 16);
-  const fonts = all.filter((l) => (l.type === "fontFamily" || /^font\.family\./.test(l.path)) && typeof l.value === "string").map((l) => normalizeFontFamily(l.value));
+  const fontLeaves = all.filter((l) => (l.type === "fontFamily" || /^font\.family\./.test(l.path)) && typeof l.value === "string");
+  const fonts = fontLeaves.map((l) => normalizeFontFamily(l.value));
+  const fontVars = fontLeaves.map((l) => `--${l.path.replace(/\./g, "-")}`);
   const components = config.components ?? [];
   const replaces = /* @__PURE__ */ new Map();
   for (const c of components) {
@@ -193,6 +199,7 @@ function resolveConfig(config) {
     spacing: uniqSorted(spacing),
     radii: uniqSorted(radii),
     fonts: [...new Set(fonts)],
+    fontVars: fontVars.length ? fontVars : ["--font-family-sans"],
     components,
     replaces,
     rules: config.rules ?? {},
@@ -265,7 +272,7 @@ var noHardcodedColor = {
       let best = config.colors[0];
       let bestD = Infinity;
       for (const c of config.colors) {
-        const d = deltaE(lab, c.lab);
+        const d = deltaE(lab, c.lab) + Math.abs(rgb.a - (c.alpha ?? 1)) * 100;
         if (d < bestD) {
           bestD = d;
           best = c;
@@ -698,7 +705,7 @@ function formatMarkdown(report, opts = {}) {
 }
 
 // ../cli/src/api.ts
-var DEFAULT_API = "http://localhost:3000";
+var DEFAULT_API = "https://web-phi-nine-77.vercel.app";
 function apiBase() {
   return (process.env.BRANDRAIL_API_URL ?? DEFAULT_API).replace(/\/$/, "");
 }

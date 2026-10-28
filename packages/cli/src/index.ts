@@ -6,8 +6,11 @@ import {
   formatGithubAnnotations,
   formatMarkdown,
   formatPretty,
+  diffTokens,
   generateInstructions,
+  importTokens,
   mcpClientConfigs,
+  mergeTokens,
   RULE_FILES,
   resolveConfig,
   RULES,
@@ -24,6 +27,7 @@ const HELP = `brandrail ${ENGINE_VERSION} — check that UI follows your design 
 Usage
   brandrail check [paths...]   Scan files and print violations
   brandrail init               Create brandrail.config.json and AI rule files
+  brandrail import <file>      Load tokens (DTCG, Tokens Studio, Figma variables JSON) into the config
   brandrail rules              List the rules
 
 Options for check
@@ -40,6 +44,10 @@ Options for init
   --mcp                  Also add the Brandrail MCP server to .mcp.json, .cursor/mcp.json, .vscode/mcp.json
                          and print the Codex / Windsurf config
   --force                Overwrite an existing brandrail.config.json
+
+Options for import
+  --replace              Replace the config's tokens instead of merging
+  --primitives           Keep raw palette ramps (gray.100…900) that semantic tokens point at
 
 Environment
   BRANDRAIL_KEY          API key from Dashboard → Connect
@@ -214,6 +222,23 @@ async function cmdInit(cwd: string, flags: Flags): Promise<number> {
   return 0;
 }
 
+function cmdImport(cwd: string, positional: string[], flags: Flags): number {
+  const file = positional[0];
+  if (!file) throw new Error("Usage: brandrail import <tokens.json> [--replace] [--primitives]");
+  const raw = JSON.parse(readFileSync(resolve(cwd, file), "utf8")) as unknown;
+  const res = importTokens(raw, { includePrimitives: !!flags.primitives });
+  const path = (typeof flags.config === "string" ? resolve(cwd, flags.config) : findConfig(cwd)) ?? join(cwd, CONFIG_FILE);
+  const config: BrandrailConfig = existsSync(path) ? readConfig(path) : { ...starterConfig, tokens: {} };
+  const next = flags.replace ? res.tokens : mergeTokens(config.tokens, res.tokens);
+  const d = diffTokens(config.tokens, next);
+  writeFileSync(path, `${JSON.stringify({ ...config, tokens: next }, null, 2)}\n`);
+  log(`✔ ${res.count} tokens from ${file} (${res.format})${res.primitives ? `, ${res.primitives} palette primitives left out (--primitives to keep)` : ""}`);
+  for (const n of res.notes) log(`  · ${n}`);
+  log(`✔ ${relative(cwd, path) || CONFIG_FILE}: ${d.changed.length} changed, ${d.added.length} added, ${d.removed.length} removed`);
+  log("\nNext: npx brandrail init (to refresh AI rule files), then npx brandrail check");
+  return 0;
+}
+
 function cmdRules(): number {
   for (const r of RULES) process.stdout.write(`${r.id.padEnd(28)} ${r.defaultSeverity.padEnd(8)} ${r.description}\n`);
   return 0;
@@ -231,6 +256,8 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       return cmdCheck(cwd, positional, flags);
     case "init":
       return cmdInit(cwd, flags);
+    case "import":
+      return cmdImport(cwd, positional, flags);
     case "rules":
       return cmdRules();
     default:

@@ -98,7 +98,8 @@ export const noHardcodedColor: Rule = {
       let best = config.colors[0]!;
       let bestD = Infinity;
       for (const c of config.colors) {
-        const d = deltaE(lab, c.lab);
+        // A translucent token is a different colour from the same hex at full opacity.
+        const d = deltaE(lab, c.lab) + Math.abs(rgb.a - (c.alpha ?? 1)) * 100;
         if (d < bestD) {
           bestD = d;
           best = c;

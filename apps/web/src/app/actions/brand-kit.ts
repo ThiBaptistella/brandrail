@@ -2,20 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { isSupabaseConfigured } from "@/lib/env";
-import { nextVersion, toDtcg, type BrandKitState } from "@/lib/brand-kit";
+import { nextVersion, toDtcg, validateKit, type BrandKitState } from "@/lib/brand-kit";
+import { fetchFigmaTokens, type FigmaFetchResult } from "@/lib/figma";
 import { requireOrg } from "@/lib/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type PublishResult = { ok: true; version: string; demo?: boolean } | { ok: false; error: string };
+export type KitSource = "manual" | "figma" | "import";
 
-const HEX = /^#[0-9a-f]{6}$/i;
-
-export async function publishBrandKitAction(state: BrandKitState, notes?: string): Promise<PublishResult> {
+export async function publishBrandKitAction(state: BrandKitState, opts: { notes?: string; source?: KitSource } = {}): Promise<PublishResult> {
   const { user, org } = await requireOrg();
 
-  if (!Array.isArray(state.colors) || state.colors.some((c) => !HEX.test(c.value))) {
-    return { ok: false, error: "Every colour must be a 6-digit hex value like #1f883d." };
-  }
+  const invalid = validateKit(state);
+  if (invalid) return { ok: false, error: invalid };
   if (org.role !== "owner" && org.role !== "admin") {
     return { ok: false, error: "Only owners and admins can publish the Brand Kit." };
   }
@@ -33,18 +32,30 @@ export async function publishBrandKitAction(state: BrandKitState, notes?: string
     .maybeSingle();
 
   const version = nextVersion(latest?.version ?? null);
+  const source: KitSource = opts.source && ["manual", "figma", "import"].includes(opts.source) ? opts.source : "manual";
   const { error } = await supabase.from("token_set_versions").insert({
     org_id: org.id,
     version,
     status: "published",
     tokens: toDtcg(state),
-    source: "manual",
-    notes: notes ?? null,
+    source,
+    notes: opts.notes?.slice(0, 500) ?? null,
     published_at: new Date().toISOString(),
     created_by: user.id,
   });
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/dashboard/brand-kit");
+  revalidatePath("/dashboard");
   return { ok: true, version };
+}
+
+/**
+ * Reads variables (or, without Variables API access, colour and text styles) from a Figma file.
+ * The personal access token is used for this request only and never stored.
+ */
+export async function importFromFigmaAction(input: { token: string; url: string }): Promise<FigmaFetchResult> {
+  const { org } = await requireOrg();
+  if (org.role !== "owner" && org.role !== "admin") return { ok: false, error: "Only owners and admins can import into the Brand Kit." };
+  return fetchFigmaTokens(input.token, input.url);
 }

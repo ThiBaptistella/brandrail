@@ -24,6 +24,15 @@ Still to do in the Supabase dashboard:
 3. For quick local testing you can turn off "Confirm email" under Auth → Providers → Email.
 4. Auth → Passwords: turn on leaked password protection (flagged by the security advisor).
 
+## Production
+
+Live at https://web-phi-nine-77.vercel.app (Vercel project `web`, root `apps/web`, deploys on push to `main`).
+
+- Vercel env (Production): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`. They're baked in at build time, so redeploy after changing them. Without them the app runs in demo mode.
+- Supabase Auth → URL Configuration: Site URL is the Vercel URL; Redirect URLs include it with `/**` plus `http://localhost:3000/**` for local dev.
+- The CLI and GitHub Action talk to the hosted URL by default. Set `BRANDRAIL_API_URL=http://localhost:3000` (or the Action's `api-url`) to use a local server.
+- Changing the domain: update the three places above and `DEFAULT_API` in `packages/cli/src/api.ts`, then `pnpm build:action`.
+
 ## Checker
 
 One rules engine (`packages/engine`) runs everywhere: CLI, GitHub Action, the web playground, and next the MCP server.
@@ -54,6 +63,25 @@ API (API-key auth, used by CLI / Action / MCP):
 - `GET /api/v1/brand-kit` → published Brand Kit as a `brandrail.config.json`
 - `POST /api/v1/scans` → store a report; returns the dashboard URL
 - `POST /api/mcp` → MCP server (Streamable HTTP, stateless, `Authorization: Bearer <key>`)
+
+## Brand Kit tokens
+
+Stored as W3C DTCG JSON in `token_set_versions.tokens`. A colour's dark-mode value lives in
+`$extensions["dev.brandrail"].modes.dark`, so it keeps one name and one CSS variable; the Checker accepts
+both values and AI tools see both.
+
+**Import** (Dashboard → Brand Kit → Import, or `brandrail import tokens.json`) reads:
+
+| Source | Notes |
+| --- | --- |
+| Figma file link + personal access token | Variables API (Enterprise plans, `file_variables:read`): collections, modes, aliases. A mode named *Dark* becomes the dark value. Other plans fall back to colour and text styles. The token is used once and never stored. |
+| DTCG JSON | `$value` / `$type`, `{alias.references}` |
+| Tokens Studio JSON | Token sets; a set named *dark* supplies dark values |
+| Figma variables exports | Mode-keyed objects like the UI kit's `src/styles/tokens.js` (`light`/`dark`, `themeA`/`themeB`, `defaultRadius`/`rounded`/`sharp`) |
+
+Semantic tokens that point at a palette are kept; the raw ramps (`gray.100…900`) are left out unless you
+tick *Include primitives* (`--primitives`), so AI tools reach for the semantic names. You review a diff
+(changed / added / removed) and choose Merge or Replace before anything is published.
 
 ## MCP server
 
@@ -95,11 +123,11 @@ supabase/migrations/   Postgres schema with row-level security
 
 - [x] Bring in the Midrocks UI kit as `@brandrail/kit` (live gallery on Dashboard → Components)
 - [ ] New kit components: DataTable, Charts, Maps
-- [ ] Reuse the kit's `scripts/figmaApi.js` + `generateThemes.js` for "Import from Figma"
+- [x] Import tokens: Figma file (variables, or styles on non-Enterprise plans), DTCG, Tokens Studio, variable exports
 - [x] Save Brand Kit versions to `token_set_versions`
 - [x] `packages/engine` + CLI + GitHub Action + ingest API + real dashboard data
 - [x] MCP server at `/api/mcp` on the same engine
 - [x] Component registry editing + import from the UI kit
-- [ ] Brand Kit editor: add/remove colour tokens, spacing and radius scales (not just edit)
+- [x] Brand Kit editor: add/remove/rename colours with dark values, fonts, type scale, spacing and radius scales
 - [ ] Publish `@brandrail/cli` to npm; deploy the web app (Vercel) so the Action can upload
 - [ ] `apps/worker` — Playwright URL scanner

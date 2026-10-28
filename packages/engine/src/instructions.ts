@@ -30,13 +30,17 @@ export function generateInstructions(config: BrandrailConfig, opts: { org?: stri
   if (r.colors.length) {
     lines.push("## Colours");
     lines.push("Use CSS variables only. Never write hex, rgb() or hsl() values, and never use Tailwind palette classes like `bg-blue-500`.");
-    for (const c of r.colors) lines.push(`- \`var(${c.cssVar})\` — ${c.path} (${c.hex})`);
+    for (const c of r.colors) {
+      if (c.mode) continue;
+      const dark = r.colors.find((d) => d.mode === "dark" && d.path === c.path);
+      lines.push(`- \`var(${c.cssVar})\` — ${c.path} (${c.hex}${dark ? `, dark ${dark.hex}` : ""})`);
+    }
     lines.push("");
   }
   lines.push("## Spacing, radius and type");
   lines.push(`- Spacing (padding, margin, gap) must be one of: ${r.spacing.filter((s) => s > 2).map((s) => `${s}px`).join(", ")}.`);
   lines.push(`- Corner radius must be one of: ${r.radii.filter((x) => x > 0 && x < 999).map((x) => `${x}px`).join(", ")} (or fully rounded).`);
-  if (r.fonts.length) lines.push(`- Fonts: use \`var(--font-family-sans)\`; never set another font-family.`);
+  if (r.fonts.length) lines.push(`- Fonts: use ${r.fontVars.map((v) => `\`var(${v})\``).join(" or ")}; never set another font-family.`);
   lines.push("");
   lines.push("## Before you finish");
   lines.push("- If the Brandrail MCP server is connected, call `validate_snippet` on the UI you wrote and fix every violation.");
