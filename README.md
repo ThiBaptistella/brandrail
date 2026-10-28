@@ -14,7 +14,7 @@ and the dashboard shows sample data. A yellow banner tells you when you're in de
 
 ## Supabase
 
-Project `brandrail` (ref `cyxytcoswgwgzaonkpnf`). Both migrations in `supabase/migrations/` are already applied;
+Project `brandrail` (ref `cyxytcoswgwgzaonkpnf`). All migrations in `supabase/migrations/` are already applied;
 the file names match the versions recorded in Supabase, so the GitHub integration won't re-run them.
 `apps/web/.env.local` holds the URL and publishable key (git-ignored).
 
@@ -22,6 +22,37 @@ Still to do in the Supabase dashboard:
 1. Auth → URL Configuration: Site URL `http://localhost:3000`, and add `http://localhost:3000/**` to Redirect URLs.
 2. Auth → Providers: enable GitHub and Google if you want OAuth (each needs an OAuth app's client ID/secret).
 3. For quick local testing you can turn off "Confirm email" under Auth → Providers → Email.
+4. Auth → Passwords: turn on leaked password protection (flagged by the security advisor).
+
+## Checker
+
+One rules engine (`packages/engine`) runs everywhere: CLI, GitHub Action, the web playground, and next the MCP server.
+
+| Rule | Default | Catches |
+| --- | --- | --- |
+| `no-hardcoded-color` | error | hex / rgb / hsl literals and Tailwind `[#…]` values; suggests the closest token (ΔE) |
+| `no-raw-palette-class` | warning | `bg-blue-500`, `hover:text-gray-700`… instead of semantic classes |
+| `prefer-official-component` | error | raw `<button>`, `<input>`, `<select>`, `<textarea>` when the registry has a component |
+| `forbidden-import` | error | other UI libraries (MUI, antd, Chakra, Bootstrap…) |
+| `spacing-scale` | warning | padding / margin / gap off the spacing scale (CSS, style objects, `p-[13px]`) |
+| `font-family` | warning | fonts that aren't in the Brand Kit |
+| `radius-scale` | info | border-radius values that aren't radius tokens |
+| `img-alt` | warning | `<img>` without alt text |
+
+```bash
+pnpm test                        # engine tests
+pnpm build:cli                   # → packages/cli/dist/brandrail.mjs
+node packages/cli/dist/brandrail.mjs init --from-api     # needs BRANDRAIL_KEY + BRANDRAIL_API_URL
+node packages/cli/dist/brandrail.mjs check --changed --upload --fail-below 80
+pnpm build:action                # rebuild + commit packages/github-action/dist after engine changes
+```
+
+Rules can be turned off or re-levelled per repo in `brandrail.config.json` → `"rules": { "radius-scale": "off" }`.
+The GitHub Action usage is in `packages/github-action/README.md`. Its `api-url` must be a public URL (deploy the web app first).
+
+API (API-key auth, used by CLI / Action / MCP):
+- `GET /api/v1/brand-kit` → published Brand Kit as a `brandrail.config.json`
+- `POST /api/v1/scans` → store a report; returns the dashboard URL
 
 ## Structure
 
@@ -32,8 +63,12 @@ apps/
     src/app/(auth)/    Sign in, sign up, forgot password
     src/app/onboarding Create organisation
     src/app/dashboard/ Overview, Brand Kit, Components, Connect, Checks, Settings
-    src/lib/mock.ts    Sample data until the Checker and MCP server are wired up
+    src/app/api/v1/    brand-kit + scans endpoints (API-key auth)
+    src/lib/data.ts    Dashboard queries (falls back to src/lib/mock.ts in demo mode)
 packages/
+  engine/              Checker rules engine — pure TS, no deps, shared everywhere
+  cli/                 `brandrail` CLI (check, init, rules), bundled with esbuild
+  github-action/       Composite action; dist/ is committed
   ui/                  Brandrail app primitives (GitHub/Primer look) used by the web app
   kit/                 Midrocks UI kit (copied unchanged from default-ui-kit/src) + new "brandrail" theme
     src/styles/themes/brandrail.css   GitHub palette mapped onto the kit's semantic variables
@@ -46,7 +81,9 @@ supabase/migrations/   Postgres schema with row-level security
 - [x] Bring in the Midrocks UI kit as `@brandrail/kit` (live gallery on Dashboard → Components)
 - [ ] New kit components: DataTable, Charts, Maps
 - [ ] Reuse the kit's `scripts/figmaApi.js` + `generateThemes.js` for "Import from Figma"
-- [ ] Save Brand Kit versions to `token_set_versions`
-- [ ] `packages/engine` — Checker rules (AST) shared by CLI, GitHub Action, MCP and scan worker
-- [ ] `apps/mcp` — MCP server (get_design_tokens, find_component, validate_snippet…)
+- [x] Save Brand Kit versions to `token_set_versions`
+- [x] `packages/engine` + CLI + GitHub Action + ingest API + real dashboard data
+- [ ] `apps/web/api/mcp` — MCP server (get_design_tokens, find_component, validate_snippet) on the same engine
+- [ ] Component registry editing (feeds `prefer-official-component`)
+- [ ] Publish `@brandrail/cli` to npm; deploy the web app (Vercel) so the Action can upload
 - [ ] `apps/worker` — Playwright URL scanner

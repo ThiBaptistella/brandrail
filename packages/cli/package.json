@@ -1,0 +1,20 @@
+{
+  "name": "@brandrail/cli",
+  "version": "0.1.0",
+  "description": "Check that your UI follows your design system. Brandrail CLI.",
+  "type": "module",
+  "bin": {
+    "brandrail": "./dist/brandrail.mjs"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --banner:js='#!/usr/bin/env node'",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@brandrail/engine": "workspace:*",
+    "@types/node": "^22",
+    "esbuild": "^0.28.2",
+    "typescript": "5.9.3"
+  }
+}

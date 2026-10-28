@@ -13,7 +13,6 @@ const tools: Tool[] = [
     blurb: "Add the MCP server with one command.",
     file: "Terminal",
     snippet: (url) => `claude mcp add --transport http brandrail ${url} \\\n  --header "Authorization: Bearer $BRANDRAIL_KEY"`,
-    connected: true,
   },
   {
     id: "cursor",
@@ -41,7 +40,7 @@ const tools: Tool[] = [
     name: "Any tool (rule files)",
     blurb: "Writes CLAUDE.md, .cursor/rules, copilot-instructions and AGENTS.md from your Brand Kit.",
     file: "Terminal",
-    snippet: (_url, slug) => `npx brandrail init --org ${slug}`,
+    snippet: () => `npx @brandrail/cli init --from-api`,
   },
 ];
 
@@ -54,7 +53,8 @@ export function ToolSetup({ mcpUrl, slug }: { mcpUrl: string; slug: string }) {
   return (
     <Box>
       <BoxHeader>
-        <h2 className="text-sm font-semibold text-fg">Connect an AI tool</h2>
+        <h2 className="text-[13px] font-medium text-fg">Connect an AI tool</h2>
+        <span className="ml-auto text-xs text-fg-subtle">Rule files work today · MCP server is the next build</span>
       </BoxHeader>
       <div className="grid md:grid-cols-[220px_1fr]">
         <ul className="flex gap-1 overflow-x-auto border-b border-line p-2 md:flex-col md:border-r md:border-b-0">

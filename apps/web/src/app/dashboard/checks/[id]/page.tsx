@@ -1,71 +1,69 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  TriangleAlert as AlertIcon,
-  ArrowLeft as ArrowLeftIcon,
-  CircleCheck as CheckCircleIcon,
-  FileCode as FileCodeIcon,
-  Info as InfoIcon,
-  Lightbulb as LightBulbIcon,
-  OctagonX as StopIcon,
-  CircleX as XCircleIcon,
-} from "lucide-react";
-import { Blankslate, Box, BoxHeader, Button, Label } from "@brandrail/ui";
-import { ScanStatusIcon } from "@/components/dashboard/scan-status";
+import { ArrowLeft, CircleCheck, CircleX, FileCode, Info, Lightbulb, OctagonX, TriangleAlert } from "lucide-react";
+import { RULES } from "@brandrail/engine";
+import { Blankslate, Box, BoxHeader, Label } from "@brandrail/ui";
 import { scoreTone } from "@/components/dashboard/sparkline";
-import { scans, targets, violationsByScan, type Violation } from "@/lib/mock";
+import { getScan, timeAgo, type ViolationRow } from "@/lib/data";
+import { requireOrg } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Check details" };
 
 const sevIcon = {
-  error: <StopIcon size={16} className="text-danger" />,
-  warning: <AlertIcon size={16} className="text-attention" />,
-  info: <InfoIcon size={16} className="text-accent" />,
+  error: <OctagonX size={16} className="text-danger" />,
+  warning: <TriangleAlert size={16} className="text-attention" />,
+  info: <Info size={16} className="text-accent" />,
 };
+const sourceLabel = { ci: "Pull request", cli: "CLI", mcp: "AI tool", worker: "URL scan" } as const;
+const ruleTitle = (id: string) => RULES.find((r) => r.id === id)?.title ?? id;
 
 export default async function CheckDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const scan = scans.find((s) => s.id === id);
-  if (!scan) notFound();
-  const target = targets.find((t) => t.id === scan.targetId);
-  const violations = violationsByScan[id] ?? [];
-  const byFile = violations.reduce<Record<string, Violation[]>>((acc, v) => {
+  const { org } = await requireOrg();
+  const found = await getScan(org, id);
+  if (!found) notFound();
+  const { scan, violations } = found;
+
+  const byFile = violations.reduce<Record<string, ViolationRow[]>>((acc, v) => {
     (acc[v.file] ??= []).push(v);
     return acc;
   }, {});
-  const counts = { error: 0, warning: 0, info: 0 };
-  for (const v of violations) counts[v.severity]++;
+  const tone = scan.score !== null ? scoreTone(scan.score, scan.threshold ?? 80) : "attention";
+  const passed = scan.status === "passed";
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/dashboard/checks" className="inline-flex items-center gap-1 text-sm text-fg-muted hover:text-accent">
-        <ArrowLeftIcon size={16} /> All checks
+      <Link href="/dashboard/checks" className="inline-flex items-center gap-1.5 text-[13px] text-fg-muted hover:text-fg">
+        <ArrowLeft size={14} /> All checks
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
-        <div>
-          <h1 className="text-2xl font-normal text-fg">
-            {scan.title} <span className="text-fg-muted">{scan.ref}</span>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-normal tracking-tight text-fg">
+            {scan.title} {scan.ref && <span className="text-fg-subtle">{scan.ref}</span>}
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-fg-muted">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium text-on-emphasis" style={{ background: scan.status === "passed" ? "var(--br-success-emphasis)" : "var(--br-danger-emphasis)" }}>
-              {scan.status === "passed" ? <CheckCircleIcon size={14} /> : <XCircleIcon size={14} />}{" "}
-              {scan.status === "passed" ? "Passed" : "Below threshold"}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-fg-muted">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${passed ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger"}`}
+            >
+              {passed ? <CircleCheck size={13} /> : <CircleX size={13} />} {passed ? "Passed" : "Below threshold"}
             </span>
-            <span>
-              <strong className="text-fg">{target?.name}</strong> · by {scan.author} · {scan.when} · {scan.duration}
-            </span>
+            <span className="text-fg">{scan.targetName}</span>
+            <span>· {sourceLabel[scan.source]}</span>
+            <span>· {timeAgo(scan.createdAt)}</span>
+            {scan.durationMs !== null && <span>· {scan.durationMs}ms</span>}
+            {scan.tokenVersion && <span>· Brand Kit v{scan.tokenVersion}</span>}
           </div>
         </div>
         {scan.score !== null && (
           <div className="text-right">
-            <div className="text-xs text-fg-muted">Brand score</div>
-            <div className={`text-4xl font-semibold ${scoreTone(scan.score, target?.threshold) === "success" ? "text-success" : scoreTone(scan.score, target?.threshold) === "attention" ? "text-attention" : "text-danger"}`}>
+            <div className="text-xs text-fg-subtle">Brand score</div>
+            <div className={`text-4xl font-normal ${tone === "success" ? "text-success" : tone === "attention" ? "text-attention" : "text-danger"}`}>
               {scan.score}
-              <span className="text-base text-fg-muted">/100</span>
+              <span className="text-base text-fg-subtle">/100</span>
             </div>
-            <div className="text-xs text-fg-muted">threshold {target?.threshold}</div>
+            {scan.threshold !== null && <div className="text-xs text-fg-subtle">threshold {scan.threshold}</div>}
           </div>
         )}
       </div>
@@ -73,7 +71,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
       {violations.length === 0 ? (
         <Box>
           <Blankslate
-            icon={<ScanStatusIcon status="passed" size={32} />}
+            icon={<CircleCheck size={32} className="text-success" />}
             title="No violations"
             description="Everything in this check used approved tokens and components."
           />
@@ -81,32 +79,38 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
       ) : (
         <>
           <div className="flex flex-wrap gap-2">
-            <Label tone="danger">{counts.error} errors</Label>
-            <Label tone="attention">{counts.warning} warnings</Label>
-            <Label tone="accent">{counts.info} info</Label>
-            <Button size="sm" variant="primary" className="ml-auto">Open fix PR</Button>
+            <Label tone="danger">{violations.filter((v) => v.severity === "error").length} errors</Label>
+            <Label tone="attention">{violations.filter((v) => v.severity === "warning").length} warnings</Label>
+            <Label tone="accent">{violations.filter((v) => v.severity === "info").length} info</Label>
           </div>
           {Object.entries(byFile).map(([file, list]) => (
             <Box key={file}>
               <BoxHeader>
-                <FileCodeIcon size={16} className="text-fg-muted" />
-                <span className="font-mono text-sm font-semibold text-fg">{file}</span>
-                <span className="ml-auto text-xs text-fg-muted">{list.length} issue{list.length > 1 ? "s" : ""}</span>
+                <FileCode size={15} className="text-fg-subtle" />
+                <span className="font-mono text-[13px] text-fg">{file}</span>
+                <span className="ml-auto text-xs text-fg-subtle">
+                  {list.length} issue{list.length > 1 ? "s" : ""}
+                </span>
               </BoxHeader>
               <ul>
-                {list.map((v) => (
-                  <li key={`${v.line}-${v.rule}`} className="flex gap-3 border-b border-line px-4 py-3 last:border-0">
+                {list.map((v, i) => (
+                  <li key={i} className="flex gap-3 border-b border-line px-4 py-3 last:border-0">
                     <span className="mt-0.5">{sevIcon[v.severity]}</span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <span className="font-mono text-xs text-fg-muted">L{v.line}</span>
+                      <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                        {v.line !== null && <span className="font-mono text-xs text-fg-subtle">L{v.line}</span>}
                         <span className="text-fg">{v.message}</span>
-                        <code className="rounded-md bg-fg-muted/10 px-1.5 py-0.5 font-mono text-xs text-fg-muted">{v.rule}</code>
+                        <code className="rounded bg-fg-muted/10 px-1.5 py-px font-mono text-[11px] text-fg-muted" title={ruleTitle(v.ruleId)}>
+                          {v.ruleId}
+                        </code>
                       </div>
-                      <div className="mt-1.5 flex items-start gap-1.5 text-sm text-success">
-                        <LightBulbIcon size={14} className="mt-0.5 shrink-0" />
-                        <span>{v.suggestion}</span>
-                      </div>
+                      {v.snippet && <pre className="mt-1.5 overflow-x-auto rounded bg-canvas-inset px-2 py-1 font-mono text-[11px] text-fg-muted">{v.snippet}</pre>}
+                      {v.suggestion && (
+                        <div className="mt-1.5 flex items-start gap-1.5 text-[13px] text-success">
+                          <Lightbulb size={14} className="mt-0.5 shrink-0" />
+                          <span>{v.suggestion}</span>
+                        </div>
+                      )}
                     </div>
                   </li>
                 ))}

@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@brandrail/engine": "workspace:*",
     "@brandrail/kit": "workspace:*",
     "@brandrail/tokens": "workspace:*",
     "@brandrail/ui": "workspace:*",

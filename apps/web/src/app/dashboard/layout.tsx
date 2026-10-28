@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <DemoBanner />
         <DashboardHeader user={user} org={org} theme={theme} />
         <MobileNav />
-        <main className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-8 md:py-10">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 md:px-6 lg:px-8">{children}</main>
       </div>
     </div>
   );

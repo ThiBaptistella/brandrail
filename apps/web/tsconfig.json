@@ -5,6 +5,7 @@
     "jsx": "preserve",
     "incremental": true,
     "noUncheckedIndexedAccess": false,
+    "allowImportingTsExtensions": true,
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./src/*"] }
   },

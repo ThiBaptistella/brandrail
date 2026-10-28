@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@brandrail/ui", "@brandrail/tokens", "@brandrail/kit"],
+  transpilePackages: ["@brandrail/ui", "@brandrail/tokens", "@brandrail/kit", "@brandrail/engine"],
   poweredByHeader: false,
   turbopack: {
     rules: {

@@ -8,3 +8,6 @@ dist
 *.tsbuildinfo
 .DS_Store
 next-env.d.ts
+
+# The GitHub Action runs from its committed bundle
+!packages/github-action/dist

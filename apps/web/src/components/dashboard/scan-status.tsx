@@ -1,15 +1,17 @@
-import { CircleCheck as CheckCircleFillIcon, CircleDot as DotFillIcon, CircleX as XCircleFillIcon, Clock as ClockIcon } from "lucide-react";
-import type { ScanStatus } from "@/lib/mock";
+import { CircleCheck, CircleDot, CircleX, Clock, CircleAlert } from "lucide-react";
+import type { ScanStatus } from "@/lib/data";
 
 export function ScanStatusIcon({ status, size = 16 }: { status: ScanStatus; size?: number }) {
   switch (status) {
     case "passed":
-      return <CheckCircleFillIcon size={size} className="text-success" aria-label="Passed" />;
+      return <CircleCheck size={size} className="text-success" aria-label="Passed" />;
     case "failed":
-      return <XCircleFillIcon size={size} className="text-danger" aria-label="Failed" />;
+      return <CircleX size={size} className="text-danger" aria-label="Below threshold" />;
     case "running":
-      return <DotFillIcon size={size} className="animate-pulse text-attention" aria-label="Running" />;
+      return <CircleDot size={size} className="animate-pulse text-attention" aria-label="Running" />;
+    case "error":
+      return <CircleAlert size={size} className="text-danger" aria-label="Error" />;
     default:
-      return <ClockIcon size={size} className="text-fg-muted" aria-label="Queued" />;
+      return <Clock size={size} className="text-fg-muted" aria-label="Queued" />;
   }
 }

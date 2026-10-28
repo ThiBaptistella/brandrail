@@ -6,9 +6,13 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "test": "pnpm --filter @brandrail/engine test",
+    "build:cli": "pnpm --filter @brandrail/cli build",
+    "build:action": "pnpm --filter @brandrail/github-action build"
   },
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "turbo": "^2.11.10",
     "typescript": "5.9.3"
   }
