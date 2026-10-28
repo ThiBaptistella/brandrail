@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { AuthCard } from "@/components/auth/auth-card";
 import { LoginForm } from "@/components/auth/login-form";
-import { Divider, OAuthButtons } from "@/components/auth/oauth-buttons";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -24,7 +24,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       }
     >
       <OAuthButtons next={safeNext} />
-      <Divider />
       <LoginForm next={safeNext} initialError={error} />
     </AuthCard>
   );

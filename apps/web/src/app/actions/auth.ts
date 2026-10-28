@@ -79,7 +79,9 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
 }
 
 export async function oauthAction(formData: FormData): Promise<void> {
-  const provider = String(formData.get("provider") ?? "github") as "github" | "google";
+  const raw = String(formData.get("provider") ?? "");
+  if (raw !== "github" && raw !== "google") redirect("/login");
+  const provider = raw;
   const next = safeNext(formData.get("next"));
 
   if (!isSupabaseConfigured) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { AuthCard } from "@/components/auth/auth-card";
 import { SignupForm } from "@/components/auth/signup-form";
-import { Divider, OAuthButtons } from "@/components/auth/oauth-buttons";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 export const metadata: Metadata = { title: "Create your account" };
 
@@ -21,8 +21,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
         </>
       }
     >
-      <OAuthButtons next="/onboarding" />
-      <Divider />
+      <OAuthButtons next="/dashboard" />
       <SignupForm defaultEmail={email} />
     </AuthCard>
   );

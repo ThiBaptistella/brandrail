@@ -1,5 +1,6 @@
 import { MarkGithubIcon } from "@primer/octicons-react";
 import { oauthAction } from "@/app/actions/auth";
+import { enabledOAuthProviders } from "@/lib/auth-providers";
 import { SubmitButton } from "./submit-button";
 
 function GoogleIcon() {
@@ -13,20 +14,28 @@ function GoogleIcon() {
   );
 }
 
-export function OAuthButtons({ next = "/dashboard" }: { next?: string }) {
+const LABEL = { github: "GitHub", google: "Google" } as const;
+const ICON = { github: <MarkGithubIcon size={18} />, google: <GoogleIcon /> } as const;
+
+/** Social sign-in buttons for the providers enabled in Supabase, plus the "or" divider. Renders nothing when none are. */
+export async function OAuthButtons({ next = "/dashboard" }: { next?: string }) {
+  const providers = await enabledOAuthProviders();
+  if (!providers.length) return null;
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <form action={oauthAction}>
-        <input type="hidden" name="provider" value="github" />
-        <input type="hidden" name="next" value={next} />
-        <SubmitButton block size="xl" leadingIcon={<MarkGithubIcon size={18} />}>GitHub</SubmitButton>
-      </form>
-      <form action={oauthAction}>
-        <input type="hidden" name="provider" value="google" />
-        <input type="hidden" name="next" value={next} />
-        <SubmitButton block size="xl" leadingIcon={<GoogleIcon />}>Google</SubmitButton>
-      </form>
-    </div>
+    <>
+      <div className={providers.length > 1 ? "grid gap-3 sm:grid-cols-2" : "grid"}>
+        {providers.map((p) => (
+          <form key={p} action={oauthAction}>
+            <input type="hidden" name="provider" value={p} />
+            <input type="hidden" name="next" value={next} />
+            <SubmitButton block size="xl" leadingIcon={ICON[p]}>
+              {providers.length > 1 ? LABEL[p] : `Continue with ${LABEL[p]}`}
+            </SubmitButton>
+          </form>
+        ))}
+      </div>
+      <Divider />
+    </>
   );
 }
 
