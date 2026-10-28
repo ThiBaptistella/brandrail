@@ -6,15 +6,18 @@
   "bin": {
     "brandrail": "./dist/brandrail.mjs"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --banner:js='#!/usr/bin/env node'",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --external:playwright --external:playwright-core --banner:js='#!/usr/bin/env node'",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@brandrail/engine": "workspace:*",
     "@types/node": "^22",
     "esbuild": "^0.28.2",
+    "playwright-core": "1.63.0",
     "typescript": "5.9.3"
   }
 }

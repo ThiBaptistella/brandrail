@@ -21,14 +21,20 @@ export default async function HomePage() {
     <div className="marketing min-h-dvh">
       {/* Header */}
       <header className="relative z-10">
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-6 px-4 md:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 md:px-8">
           <Link href="/" className="[--logo-ink:#0d1117] text-white" aria-label="Brandrail home">
             <Logo />
           </Link>
           <nav className="hidden items-center gap-6 text-[15px] font-medium text-white/90 md:flex">
-            <a href="#product" className="hover:text-white/70">Product</a>
-            <a href="#how" className="hover:text-white/70">How it works</a>
-            <a href="#pricing" className="hover:text-white/70">Pricing</a>
+            <a href="#product" className="hover:text-white/70">
+              Product
+            </a>
+            <a href="#how" className="hover:text-white/70">
+              How it works
+            </a>
+            <a href="#pricing" className="hover:text-white/70">
+              Pricing
+            </a>
           </nav>
           <div className="ml-auto flex items-center gap-3">
             {user ? (
@@ -53,11 +59,8 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         <div className="hero-glow pointer-events-none absolute inset-0" />
         <div className="grid-lines pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-[1280px] px-4 pt-20 pb-16 text-center md:px-8 md:pt-28">
-          <Link
-            href="#how"
-            className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-white/80 hover:border-white/30"
-          >
+        <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-16 text-center md:px-8 md:pt-28">
+          <Link href="#how" className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-white/80 hover:border-white/30">
             <span className="rounded-full bg-[#238636] px-2 py-0.5 text-xs font-semibold text-white">New</span>
             MCP server for Cursor, Claude Code & Copilot
           </Link>
@@ -66,12 +69,13 @@ export default async function HomePage() {
             <br className="hidden md:block" /> enforced in every AI tool.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-[#9198a1] md:text-xl">
-            Everyone in your company is vibe-coding UI. Brandrail makes sure every button, colour and font they ship
-            is yours, and catches the ones that slip through.
+            Everyone in your company is vibe-coding UI. Brandrail makes sure every button, colour and font they ship is yours, and catches the ones that slip through.
           </p>
 
           <form action="/signup" className="mx-auto mt-10 flex max-w-xl flex-col gap-3 sm:flex-row">
-            <label htmlFor="hero-email" className="sr-only">Work email</label>
+            <label htmlFor="hero-email" className="sr-only">
+              Work email
+            </label>
             <input
               id="hero-email"
               name="email"
@@ -84,7 +88,10 @@ export default async function HomePage() {
             </button>
           </form>
           <p className="mt-4 text-sm text-[#9198a1]">
-            Free for one repo. <Link href="/login" className="text-[#4493f8] hover:underline">Try the demo →</Link>
+            Free for one repo.{" "}
+            <Link href="/login" className="text-[#4493f8] hover:underline">
+              Try the demo →
+            </Link>
           </p>
 
           {/* Product visual */}
@@ -99,21 +106,16 @@ export default async function HomePage() {
                   <code>
                     <span className="text-[#ff7b72]">import</span> {"{ "}
                     <span className="text-[#ffa657]">Button</span>, <span className="text-[#ffa657]">Card</span>
-                    {" }"} <span className="text-[#ff7b72]">from</span>{" "}
-                    <span className="text-[#a5d6ff]">&quot;@acme/ui&quot;</span>
+                    {" }"} <span className="text-[#ff7b72]">from</span> <span className="text-[#a5d6ff]">&quot;@acme/ui&quot;</span>
                     {"\n\n"}
-                    <span className="text-[#ff7b72]">export function</span>{" "}
-                    <span className="text-[#d2a8ff]">FleetDashboard</span>() {"{"}
+                    <span className="text-[#ff7b72]">export function</span> <span className="text-[#d2a8ff]">FleetDashboard</span>() {"{"}
                     {"\n  "}
-                    <span className="text-[#ff7b72]">return</span> (
-                    {"\n    "}&lt;<span className="text-[#7ee787]">Card</span>{" "}
-                    <span className="text-[#79c0ff]">padding</span>=<span className="text-[#a5d6ff]">&quot;md&quot;</span>&gt;
-                    {"\n      "}&lt;<span className="text-[#7ee787]">Button</span>{" "}
-                    <span className="text-[#79c0ff]">variant</span>=<span className="text-[#a5d6ff]">&quot;primary&quot;</span>&gt;
+                    <span className="text-[#ff7b72]">return</span> ({"\n    "}&lt;<span className="text-[#7ee787]">Card</span> <span className="text-[#79c0ff]">padding</span>=
+                    <span className="text-[#a5d6ff]">&quot;md&quot;</span>&gt;
+                    {"\n      "}&lt;<span className="text-[#7ee787]">Button</span> <span className="text-[#79c0ff]">variant</span>=<span className="text-[#a5d6ff]">&quot;primary&quot;</span>&gt;
                     Schedule service&lt;/<span className="text-[#7ee787]">Button</span>&gt;
                     {"\n    "}&lt;/<span className="text-[#7ee787]">Card</span>&gt;
-                    {"\n  "})
-                    {"\n"}
+                    {"\n  "}){"\n"}
                     {"}"}
                   </code>
                 </pre>
@@ -131,14 +133,18 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-4 rounded-md border border-[#3d444d]">
                   <div className="flex items-center gap-2 border-b border-[#3d444d] bg-[#151b23] px-3 py-2 text-xs">
-                    <span className="[--logo-ink:#0d1117] text-white"><Logo wordmark={false} className="scale-75" /></span>
+                    <span className="[--logo-ink:#0d1117] text-white">
+                      <Logo wordmark={false} className="scale-75" />
+                    </span>
                     <span className="font-semibold text-white">brandrail</span>
                     <span className="text-[#9198a1]">bot commented</span>
                   </div>
                   <div className="space-y-3 p-3 text-sm">
                     <div className="flex items-baseline justify-between">
                       <span className="text-white">Brand score</span>
-                      <span className="text-2xl font-semibold text-[#3fb950]">94<span className="text-sm text-[#9198a1]">/100</span></span>
+                      <span className="text-2xl font-semibold text-[#3fb950]">
+                        94<span className="text-sm text-[#9198a1]">/100</span>
+                      </span>
                     </div>
                     <ul className="space-y-2 text-[13px]">
                       <li className="flex gap-2 text-[#9198a1]">
@@ -150,7 +156,9 @@ export default async function HomePage() {
                       </li>
                       <li className="flex gap-2 text-[#9198a1]">
                         <CheckCircleFillIcon size={14} className="mt-0.5 shrink-0 text-[#3fb950]" />
-                        <span>All buttons use <code className="text-[#e6edf3]">@acme/ui</code></span>
+                        <span>
+                          All buttons use <code className="text-[#e6edf3]">@acme/ui</code>
+                        </span>
                       </li>
                       <li className="flex gap-2 text-[#9198a1]">
                         <CheckCircleFillIcon size={14} className="mt-0.5 shrink-0 text-[#3fb950]" />
@@ -166,7 +174,7 @@ export default async function HomePage() {
       </section>
 
       {/* Three pillars */}
-      <section id="how" className="mx-auto max-w-[1280px] px-4 py-24 md:px-8">
+      <section id="how" className="mx-auto max-w-7xl px-4 py-24 md:px-8">
         <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white md:text-5xl">
           Generate on-brand. <span className="text-[#9198a1]">Check what ships. Prove it to leadership.</span>
         </h2>
@@ -201,11 +209,12 @@ export default async function HomePage() {
 
         <div className="mt-6 grid items-center gap-8 rounded-xl border border-white/10 bg-[#010409] p-8 md:grid-cols-2">
           <div>
-            <div className="text-[#3fb950]"><GraphIcon size={24} /></div>
+            <div className="text-[#3fb950]">
+              <GraphIcon size={24} />
+            </div>
             <h3 className="mt-4 text-2xl font-semibold text-white">See brand drift before your customers do</h3>
             <p className="mt-2 text-[15px] leading-6 text-[#9198a1]">
-              A live score for every repo and app, the components people keep re-inventing, and a monthly report you
-              can forward to the board.
+              A live score for every repo and app, the components people keep re-inventing, and a monthly report you can forward to the board.
             </p>
           </div>
           <div className="space-y-3">
@@ -217,10 +226,7 @@ export default async function HomePage() {
               <div key={r.name} className="flex items-center gap-3">
                 <span className="w-48 truncate font-mono text-sm text-[#e6edf3]">{r.name}</span>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className={r.score >= 80 ? "h-full bg-[#3fb950]" : r.score >= 65 ? "h-full bg-[#d29922]" : "h-full bg-[#f85149]"}
-                    style={{ width: `${r.score}%` }}
-                  />
+                  <div className={r.score >= 80 ? "h-full bg-[#3fb950]" : r.score >= 65 ? "h-full bg-[#d29922]" : "h-full bg-[#f85149]"} style={{ width: `${r.score}%` }} />
                 </div>
                 <span className="w-8 text-right text-sm font-semibold text-white">{r.score}</span>
               </div>
@@ -232,14 +238,16 @@ export default async function HomePage() {
       {/* CTA */}
       <section id="pricing" className="relative overflow-hidden border-t border-white/10">
         <div className="hero-glow pointer-events-none absolute inset-0 opacity-60" />
-        <div className="relative mx-auto max-w-[1280px] px-4 py-24 text-center md:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-24 text-center md:px-8">
           <h2 className="text-3xl font-semibold tracking-tight text-white md:text-5xl">Free for one repo. Forever.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-[#9198a1]">
-            Team from $249/month. Business and Enterprise with SSO, audit log and Australian data residency.
-          </p>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-[#9198a1]">Team from $249/month. Business and Enterprise with SSO, audit log and Australian data residency.</p>
           <div className="mt-8 flex justify-center gap-3">
-            <Link href="/signup" className={buttonClasses("primary", "lg")}>Start free</Link>
-            <Link href="/login" className={buttonClasses("outline", "lg")}>Try the demo</Link>
+            <Link href="/signup" className={buttonClasses("primary", "lg")}>
+              Start free
+            </Link>
+            <Link href="/login" className={buttonClasses("outline", "lg")}>
+              Try the demo
+            </Link>
           </div>
         </div>
       </section>

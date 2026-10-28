@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Bot, Clock, Globe, GitPullRequest, Terminal } from "lucide-react";
 import { Box, BoxHeader, Label } from "@brandrail/ui";
 import { Playground } from "@/components/checks/playground";
+import { UrlScan } from "@/components/checks/url-scan";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SampleDataBadge } from "@/components/dashboard/sample-data";
 import { ScanStatusIcon } from "@/components/dashboard/scan-status";
@@ -63,6 +64,8 @@ export default async function ChecksPage({ searchParams }: { searchParams: Promi
         badge={sample ? <SampleDataBadge /> : undefined}
         description="Every scan from pull requests, the CLI, AI tools and live URLs."
       />
+
+      <UrlScan canScan />
 
       <Box>
         <BoxHeader className="justify-between">

@@ -1,5 +1,5 @@
 import "server-only";
-import { RULES, starterConfig, type BrandrailConfig, type ComponentEntry } from "@brandrail/engine";
+import { ruleTitle as engineRuleTitle, starterConfig, type BrandrailConfig, type ComponentEntry } from "@brandrail/engine";
 import { KIT_REGISTRY } from "./kit-registry";
 import { isSupabaseConfigured } from "./env";
 import * as mock from "./mock";
@@ -65,7 +65,7 @@ export interface Overview {
   steps: { org: boolean; brandKit: boolean; apiKey: boolean; ci: boolean; url: boolean };
 }
 
-const ruleTitle = (id: string) => RULES.find((r) => r.id === id)?.title ?? id;
+const ruleTitle = engineRuleTitle;
 
 export function timeAgo(iso: string | null): string {
   if (!iso) return "never";

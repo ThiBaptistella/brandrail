@@ -83,6 +83,31 @@ Semantic tokens that point at a palette are kept; the raw ramps (`gray.100…900
 tick *Include primitives* (`--primitives`), so AI tools reach for the semantic names. You review a diff
 (changed / added / removed) and choose Merge or Replace before anything is published.
 
+## Live-URL scans
+
+Code checks see source; URL scans see what the browser actually rendered (computed styles), so they also
+catch CSS from third-party widgets, CMS content and anything generated at runtime.
+
+| Rule | Flags |
+| --- | --- |
+| `no-hardcoded-color` | Text, background and border colours not in the Brand Kit (ΔE + alpha) |
+| `text-contrast` | Text below WCAG AA (4.5:1, 3:1 for large text) against its real background |
+| `font-family` | Rendered fonts that aren't Brand Kit fonts (code blocks excepted) |
+| `font-size-scale` | Font sizes off the type scale |
+| `spacing-scale` | Padding and flex/grid gaps off the spacing scale (margins skipped: auto-centering) |
+| `radius-scale` | Corner radius off the scale (pills and circles ignored) |
+
+Findings are grouped per distinct value ("#0000ee on 158 elements") with example selectors.
+
+- **Dashboard → Checks → Scan a live URL**: hosted. Runs `@sparticuz/chromium-min` on Vercel (`/api/scan-url`,
+  60s max, up to 5 pages). Public addresses only: every request, including redirects and subresources,
+  is re-resolved and private, loopback and metadata IPs are refused. 30 scans per org per hour.
+- **`brandrail scan <url>`**: on your machine, for localhost, staging and pages behind a login
+  (`--storage-state auth.json` from `npx playwright codegen --save-storage=auth.json <url>`).
+  Needs `npm i -D playwright && npx playwright install chromium`. `--upload` stores it like any other scan.
+
+Locally the hosted scanner uses Playwright's Chromium (`npx playwright install chromium`).
+
 ## MCP server
 
 Tools (all read-only, same engine as the CLI): `get_guidelines`, `get_design_tokens`, `find_component`,
@@ -130,4 +155,5 @@ supabase/migrations/   Postgres schema with row-level security
 - [x] Component registry editing + import from the UI kit
 - [x] Brand Kit editor: add/remove/rename colours with dark values, fonts, type scale, spacing and radius scales
 - [ ] Publish `@brandrail/cli` to npm; deploy the web app (Vercel) so the Action can upload
-- [ ] `apps/worker` — Playwright URL scanner
+- [x] Live-URL scanner: hosted (dashboard) + `brandrail scan <url>` (CLI)
+- [ ] Scheduled URL scans (nightly) and score trend per URL

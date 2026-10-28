@@ -12,6 +12,8 @@ export interface ResolvedConfig {
   radii: number[];
   /** Allowed first font families, lower-cased, quotes removed. */
   fonts: string[];
+  /** px values of font.size.* tokens (the type scale), sorted. */
+  fontSizes: number[];
   /** CSS variables of the font family tokens, e.g. --font-family-sans. */
   fontVars: string[];
   components: ComponentEntry[];
@@ -182,6 +184,7 @@ export function resolveConfig(config: BrandrailConfig): ResolvedConfig {
     radii: uniqSorted(radii),
     fonts: [...new Set(fonts)],
     fontVars: fontVars.length ? fontVars : ["--font-family-sans"],
+    fontSizes: uniqSorted(all.filter((l) => /^font\.size\./.test(l.path)).map((l) => px(l.value)).filter((v): v is number => v !== null)),
     components,
     replaces,
     rules: (config.rules ?? {}) as Record<string, RuleSetting>,

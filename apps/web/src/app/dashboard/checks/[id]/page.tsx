@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CircleCheck, CircleX, FileCode, Info, Lightbulb, OctagonX, TriangleAlert } from "lucide-react";
-import { RULES } from "@brandrail/engine";
+import { ArrowLeft, CircleCheck, CircleX, ExternalLink, FileCode, Globe, Info, Lightbulb, OctagonX, TriangleAlert } from "lucide-react";
+import { ruleTitle } from "@brandrail/engine";
 import { Blankslate, Box, BoxHeader, Label } from "@brandrail/ui";
 import { scoreTone } from "@/components/dashboard/sparkline";
 import { getScan, timeAgo, type ViolationRow } from "@/lib/data";
@@ -16,7 +16,6 @@ const sevIcon = {
   info: <Info size={16} className="text-accent" />,
 };
 const sourceLabel = { ci: "Pull request", cli: "CLI", mcp: "AI tool", worker: "URL scan" } as const;
-const ruleTitle = (id: string) => RULES.find((r) => r.id === id)?.title ?? id;
 
 export default async function CheckDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -41,7 +40,7 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
         <div className="min-w-0">
           <h1 className="text-2xl font-normal tracking-tight text-fg">
-            {scan.title} {scan.ref && <span className="text-fg-subtle">{scan.ref}</span>}
+            {scan.title} {scan.ref && scan.source !== "worker" && <span className="text-fg-subtle">{scan.ref}</span>}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-fg-muted">
             <span
@@ -86,8 +85,14 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
           {Object.entries(byFile).map(([file, list]) => (
             <Box key={file}>
               <BoxHeader>
-                <FileCode size={15} className="text-fg-subtle" />
-                <span className="font-mono text-[13px] text-fg">{file}</span>
+                {scan.source === "worker" ? <Globe size={15} className="text-fg-subtle" /> : <FileCode size={15} className="text-fg-subtle" />}
+                {scan.source === "worker" ? (
+                  <a href={`https://${file}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-w-0 items-center gap-1 font-mono text-[13px] text-fg hover:text-accent">
+                    <span className="truncate">{file}</span> <ExternalLink size={12} className="shrink-0" />
+                  </a>
+                ) : (
+                  <span className="font-mono text-[13px] text-fg">{file}</span>
+                )}
                 <span className="ml-auto text-xs text-fg-subtle">
                   {list.length} issue{list.length > 1 ? "s" : ""}
                 </span>
@@ -98,12 +103,13 @@ export default async function CheckDetailPage({ params }: { params: Promise<{ id
                     <span className="mt-0.5">{sevIcon[v.severity]}</span>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2 text-[13px]">
-                        {v.line !== null && <span className="font-mono text-xs text-fg-subtle">L{v.line}</span>}
+                        {v.line ? <span className="font-mono text-xs text-fg-subtle">L{v.line}</span> : null}
                         <span className="text-fg">{v.message}</span>
                         <code className="rounded bg-fg-muted/10 px-1.5 py-px font-mono text-[11px] text-fg-muted" title={ruleTitle(v.ruleId)}>
                           {v.ruleId}
                         </code>
                       </div>
+                      {v.snippet && scan.source === "worker" && <div className="mt-1 text-[11px] text-fg-subtle">Seen on</div>}
                       {v.snippet && <pre className="mt-1.5 overflow-x-auto rounded bg-canvas-inset px-2 py-1 font-mono text-[11px] text-fg-muted">{v.snippet}</pre>}
                       {v.suggestion && (
                         <div className="mt-1.5 flex items-start gap-1.5 text-[13px] text-success">

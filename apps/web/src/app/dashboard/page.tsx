@@ -37,7 +37,7 @@ export default async function OverviewPage() {
     { label: "Publish your Brand Kit", done: o.steps.brandKit, href: "/dashboard/brand-kit" },
     { label: "Create an API key", done: o.steps.apiKey, href: "/dashboard/connect" },
     { label: "Add the GitHub Action to a repo", done: o.steps.ci, href: "/dashboard/connect#github-action" },
-    { label: "Scan a live URL", done: o.steps.url, href: "/dashboard/checks" },
+    { label: "Scan a live URL", done: o.steps.url, href: "/dashboard/checks#scan-url" },
   ];
   const done = steps.filter((s) => s.done).length;
   const maxRule = Math.max(1, ...o.topRules.map((r) => r.count));

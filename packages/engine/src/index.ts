@@ -34,3 +34,14 @@ export {
   type FigmaCollection,
   type FigmaStyleNode,
 } from "./tokens.ts";
+export {
+  checkRendered,
+  collectRenderedNodes,
+  isPrivateAddress,
+  pagePath,
+  ruleTitle,
+  RENDERED_RULES,
+  type RenderedNode,
+  type RenderedPage,
+  type RenderedCheckOptions,
+} from "./rendered.ts";

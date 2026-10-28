@@ -1,7 +1,8 @@
 import { RULES } from "./rules.ts";
 import type { Report, Severity, Violation } from "./types.ts";
 
-const title = (id: string) => RULES.find((r) => r.id === id)?.title ?? id;
+const RENDERED_ONLY: Record<string, string> = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size" };
+const title = (id: string) => RULES.find((r) => r.id === id)?.title ?? RENDERED_ONLY[id] ?? id;
 
 /* ---------------- terminal ---------------- */
 
@@ -9,6 +10,8 @@ const ansi = (on: boolean) => {
   const w = (code: string) => (s: string) => (on ? `\x1b[${code}m${s}\x1b[0m` : s);
   return { red: w("31"), yellow: w("33"), cyan: w("36"), green: w("32"), dim: w("2"), bold: w("1") };
 };
+
+const rendered = (r: Report) => r.violations.length > 0 && r.violations.every((v) => v.line === 0);
 
 export function formatPretty(report: Report, { color = true, max = 200 }: { color?: boolean; max?: number } = {}): string {
   const c = ansi(color);
@@ -20,8 +23,10 @@ export function formatPretty(report: Report, { color = true, max = 200 }: { colo
       lines.push("", c.bold(v.file));
       lastFile = v.file;
     }
-    lines.push(`  ${c.dim(`${v.line}:${v.column}`.padEnd(8))} ${sev[v.severity](v.severity.padEnd(7))} ${v.message}  ${c.dim(v.ruleId)}`);
+    const rendered = v.line === 0;
+    lines.push(`  ${c.dim(rendered ? "".padEnd(8) : `${v.line}:${v.column}`.padEnd(8))} ${sev[v.severity](v.severity.padEnd(7))} ${v.message}  ${c.dim(v.ruleId)}`);
     if (v.suggestion) lines.push(`  ${" ".repeat(16)} ${c.green("→")} ${v.suggestion}`);
+    if (rendered && v.snippet) lines.push(`  ${" ".repeat(16)} ${c.dim(`on ${v.snippet}`)}`);
   }
   if (report.violations.length > max) lines.push("", c.dim(`… and ${report.violations.length - max} more`));
   const s = report.score;
@@ -29,7 +34,7 @@ export function formatPretty(report: Report, { color = true, max = 200 }: { colo
   lines.push(
     "",
     `${c.bold("Brand score")} ${scoreStr}/100  ${c.dim("·")} ${c.red(`${report.counts.error} errors`)} ${c.dim("·")} ${c.yellow(`${report.counts.warning} warnings`)} ${c.dim("·")} ${c.cyan(`${report.counts.info} info`)}`,
-    c.dim(`${report.filesScanned} files, ${report.linesScanned} lines in ${report.durationMs}ms${report.tokenVersion ? ` · Brand Kit v${report.tokenVersion}` : ""}`),
+    c.dim(`${report.filesScanned} ${rendered(report) ? "pages" : "files"}, ${report.linesScanned} ${rendered(report) ? "elements" : "lines"} in ${report.durationMs}ms${report.tokenVersion ? ` · Brand Kit v${report.tokenVersion}` : ""}`),
   );
   return lines.join("\n");
 }
@@ -81,7 +86,7 @@ export function formatMarkdown(
     out.push("", "<details><summary>Violations</summary>", "", "| | Location | Issue | Fix |", "| --- | --- | --- | --- |");
     const icon: Record<Severity, string> = { error: "🔴", warning: "🟡", info: "🔵" };
     for (const v of report.violations.slice(0, maxRows)) {
-      const loc = `${v.file}:${v.line}`;
+      const loc = v.line === 0 ? `${v.file} ${v.snippet ?? ""}`.trim() : `${v.file}:${v.line}`;
       const url = opts.fileUrl?.(v);
       const cell = (s: string) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
       out.push(`| ${icon[v.severity]} | ${url ? `[\`${loc}\`](${url})` : `\`${loc}\``} | ${cell(v.message)} | ${cell(v.suggestion ?? "")} |`);

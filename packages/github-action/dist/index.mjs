@@ -200,6 +200,7 @@ function resolveConfig(config) {
     radii: uniqSorted(radii),
     fonts: [...new Set(fonts)],
     fontVars: fontVars.length ? fontVars : ["--font-family-sans"],
+    fontSizes: uniqSorted(all.filter((l) => /^font\.size\./.test(l.path)).map((l) => px(l.value)).filter((v) => v !== null)),
     components,
     replaces,
     rules: config.rules ?? {},
@@ -660,7 +661,8 @@ function check(files, configInput, opts = {}) {
 }
 
 // ../engine/src/report.ts
-var title = (id) => RULES.find((r) => r.id === id)?.title ?? id;
+var RENDERED_ONLY = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size" };
+var title = (id) => RULES.find((r) => r.id === id)?.title ?? RENDERED_ONLY[id] ?? id;
 var esc = (s) => s.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
 var escProp = (s) => esc(s).replace(/:/g, "%3A").replace(/,/g, "%2C");
 function formatGithubAnnotations(report, max = 50) {
@@ -692,7 +694,7 @@ function formatMarkdown(report, opts = {}) {
     out.push("", "<details><summary>Violations</summary>", "", "| | Location | Issue | Fix |", "| --- | --- | --- | --- |");
     const icon = { error: "\u{1F534}", warning: "\u{1F7E1}", info: "\u{1F535}" };
     for (const v of report.violations.slice(0, maxRows)) {
-      const loc = `${v.file}:${v.line}`;
+      const loc = v.line === 0 ? `${v.file} ${v.snippet ?? ""}`.trim() : `${v.file}:${v.line}`;
       const url = opts.fileUrl?.(v);
       const cell = (s) => s.replace(/\|/g, "\\|").replace(/\n/g, " ");
       out.push(`| ${icon[v.severity]} | ${url ? `[\`${loc}\`](${url})` : `\`${loc}\``} | ${cell(v.message)} | ${cell(v.suggestion ?? "")} |`);

@@ -21,12 +21,14 @@ import {
 import { apiBase, fetchBrandKit, uploadReport } from "./api.ts";
 import { collectFiles, CONFIG_FILE, findConfig, readConfig } from "./files.ts";
 import { changedLines, repoInfo } from "./git.ts";
+import { scanPages } from "./scan.ts";
 
 const HELP = `brandrail ${ENGINE_VERSION} — check that UI follows your design system
 
 Usage
   brandrail check [paths...]   Scan files and print violations
   brandrail init               Create brandrail.config.json and AI rule files
+  brandrail scan <url>         Check a running page (localhost, staging, behind a login) in a real browser
   brandrail import <file>      Load tokens (DTCG, Tokens Studio, Figma variables JSON) into the config
   brandrail rules              List the rules
 
@@ -44,6 +46,14 @@ Options for init
   --mcp                  Also add the Brandrail MCP server to .mcp.json, .cursor/mcp.json, .vscode/mcp.json
                          and print the Codex / Windsurf config
   --force                Overwrite an existing brandrail.config.json
+
+Options for scan
+  --pages <n>            Also scan pages it links to, up to n in total (default 1, max 20)
+  --storage-state <file> Playwright storage state with your login cookies
+  --wait <ms>            Extra wait after load, for client-rendered apps
+  --width <px>           Viewport width (default 1280)
+  --format, --fail-below, --upload   As for check
+  Needs Playwright: npm i -D playwright && npx playwright install chromium
 
 Options for import
   --replace              Replace the config's tokens instead of merging
@@ -67,7 +77,7 @@ function parseArgs(argv: string[]): { cmd: string; positional: string[]; flags: 
       const [k, v] = a.slice(2).split("=", 2) as [string, string | undefined];
       const next = rest[i + 1];
       if (v !== undefined) flags[k] = v;
-      else if (next !== undefined && !next.startsWith("-") && ["config", "format", "fail-below", "changed"].includes(k)) {
+      else if (next !== undefined && !next.startsWith("-") && ["config", "format", "fail-below", "changed", "pages", "storage-state", "wait", "width"].includes(k)) {
         flags[k] = next;
         i++;
       } else flags[k] = true;
@@ -222,6 +232,56 @@ async function cmdInit(cwd: string, flags: Flags): Promise<number> {
   return 0;
 }
 
+async function cmdScan(cwd: string, positional: string[], flags: Flags): Promise<number> {
+  const url = positional[0];
+  if (!url) throw new Error("Usage: brandrail scan <url> [--pages 3] [--storage-state auth.json] [--upload]");
+  const { config, source } = await loadConfig(cwd, flags);
+  const num = (k: string, d: number, max: number) => (typeof flags[k] === "string" ? Math.min(Math.max(Number(flags[k]) || d, 0), max) : d);
+  log(`Scanning ${url} …`);
+  const { report, pages } = await scanPages(
+    cwd,
+    url,
+    config,
+    {
+      pages: Math.max(1, num("pages", 1, 20)),
+      storageState: typeof flags["storage-state"] === "string" ? flags["storage-state"] : undefined,
+      waitMs: num("wait", 0, 30_000),
+      width: num("width", 1280, 3840) || 1280,
+    },
+    log,
+  );
+  const format = typeof flags.format === "string" ? flags.format : "pretty";
+  const threshold = flags["fail-below"] !== undefined ? Number(flags["fail-below"]) : undefined;
+  if (format === "json") process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  else if (format === "markdown") process.stdout.write(`${formatMarkdown(report, { threshold })}\n`);
+  else {
+    const color = flags.color !== false && process.stdout.isTTY !== false && !process.env.NO_COLOR;
+    log(color ? `\x1b[2mBrand Kit: ${source}\x1b[0m` : `Brand Kit: ${source}`);
+    process.stdout.write(`${formatPretty(report, { color }).replace(/:0:0\b/g, "")}\n`);
+  }
+  if (flags.upload) {
+    const key = process.env.BRANDRAIL_KEY;
+    if (!key) log("warning: --upload needs BRANDRAIL_KEY; skipped");
+    else {
+      const first = new URL(pages[0]!.url);
+      const res = await uploadReport(key, {
+        source: process.env.CI ? "ci" : "cli",
+        target: { kind: "url", name: first.host, location: `${first.origin}${first.pathname === "/" ? "" : first.pathname}` },
+        ref: first.toString(),
+        title: pages.length > 1 ? `${first.host} · ${pages.length} pages` : `${first.host}${first.pathname === "/" ? "" : first.pathname}`,
+        threshold,
+        report,
+      });
+      log(`Uploaded → ${res.url ?? res.scanId}`);
+    }
+  }
+  if (threshold !== undefined && report.score < threshold) {
+    log(`\nBrand score ${report.score} is below ${threshold}.`);
+    return 1;
+  }
+  return 0;
+}
+
 function cmdImport(cwd: string, positional: string[], flags: Flags): number {
   const file = positional[0];
   if (!file) throw new Error("Usage: brandrail import <tokens.json> [--replace] [--primitives]");
@@ -256,6 +316,8 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       return cmdCheck(cwd, positional, flags);
     case "init":
       return cmdInit(cwd, flags);
+    case "scan":
+      return cmdScan(cwd, positional, flags);
     case "import":
       return cmdImport(cwd, positional, flags);
     case "rules":
