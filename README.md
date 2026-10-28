@@ -115,7 +115,7 @@ Tools (all read-only, same engine as the CLI): `get_guidelines`, `get_design_tok
 `find_component` searches the component registry (Dashboard → Components → Import from UI kit to seed it).
 
 ```bash
-npx @brandrail/cli init --from-api --mcp   # rule files + .mcp.json, .cursor/mcp.json, .vscode/mcp.json
+npx brandrail init --from-api --mcp   # rule files + .mcp.json, .cursor/mcp.json, .vscode/mcp.json
 codex mcp add brandrail --url $BRANDRAIL_API_URL/api/mcp --bearer-token-env-var BRANDRAIL_KEY
 ```
 
@@ -154,6 +154,7 @@ supabase/migrations/   Postgres schema with row-level security
 - [x] MCP server at `/api/mcp` on the same engine
 - [x] Component registry editing + import from the UI kit
 - [x] Brand Kit editor: add/remove/rename colours with dark values, fonts, type scale, spacing and radius scales
-- [ ] Publish `@brandrail/cli` to npm; deploy the web app (Vercel) so the Action can upload
+- [x] Deploy the web app (Vercel)
+- [ ] Publish the CLI to npm as `brandrail` (`cd packages/cli && npm publish`)
 - [x] Live-URL scanner: hosted (dashboard) + `brandrail scan <url>` (CLI)
 - [ ] Scheduled URL scans (nightly) and score trend per URL

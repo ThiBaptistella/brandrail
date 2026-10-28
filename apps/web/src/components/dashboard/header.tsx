@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Bell, ChevronsUpDown, CircleHelp, LogOut, Monitor, Moon, Search, Settings, Sun, User } from "lucide-react";
+import { Bell, Check, ChevronsUpDown, CircleHelp, LogOut, Monitor, Moon, Plus, Search, Settings, Sun, User } from "lucide-react";
 import { Avatar, cn } from "@brandrail/ui";
 import { LogoMark } from "@/components/logo";
 import { signOutAction } from "@/app/actions/auth";
+import { switchOrgAction } from "@/app/actions/org";
 import { setThemeAction } from "@/app/actions/theme";
 import type { Organization, SessionUser } from "@/lib/session";
 import type { ThemePref } from "@/lib/theme";
@@ -17,7 +18,7 @@ const themes: { value: ThemePref; label: string; icon: typeof Sun }[] = [
 const iconBtn =
   "flex h-8 w-8 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-btn-hover hover:text-fg";
 
-export function DashboardHeader({ user, org, theme }: { user: SessionUser; org: Organization; theme: ThemePref }) {
+export function DashboardHeader({ user, org, orgs, theme }: { user: SessionUser; org: Organization; orgs: Organization[]; theme: ThemePref }) {
   return (
     <header className="sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-line bg-canvas/85 px-4 backdrop-blur md:px-5">
       <Link href="/dashboard" className="md:hidden" aria-label="Brandrail home">
@@ -25,14 +26,31 @@ export function DashboardHeader({ user, org, theme }: { user: SessionUser; org: 
       </Link>
 
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-[13px]">
-        <button type="button" className="flex min-w-0 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-btn-hover">
-          <Avatar name={org.name} size={20} square />
-          <span className="truncate font-medium text-fg">{org.name}</span>
-          <span className="rounded border border-line px-1.5 py-px text-[10px] font-medium tracking-wide text-fg-muted uppercase">
-            Free
-          </span>
-          <ChevronsUpDown size={14} className="text-fg-subtle" />
-        </button>
+        <details className="relative min-w-0">
+          <summary className="flex min-w-0 cursor-pointer list-none items-center gap-2 rounded-md px-1.5 py-1 hover:bg-btn-hover [&::-webkit-details-marker]:hidden" aria-label="Switch organisation">
+            <Avatar name={org.name} size={20} square />
+            <span className="truncate font-medium text-fg">{org.name}</span>
+            <span className="rounded border border-line px-1.5 py-px text-[10px] font-medium tracking-wide text-fg-muted uppercase">{org.plan ?? "free"}</span>
+            <ChevronsUpDown size={14} className="shrink-0 text-fg-subtle" />
+          </summary>
+          <div className="absolute left-0 z-40 mt-2 w-64 overflow-hidden rounded-lg border border-line bg-overlay py-1.5 text-[13px] shadow-[var(--br-shadow-lg)]">
+            <div className="px-3 pt-1 pb-1.5 text-[11px] tracking-wide text-fg-subtle uppercase">Organisations</div>
+            <form action={switchOrgAction}>
+              {orgs.map((o) => (
+                <button key={o.id} type="submit" name="orgId" value={o.id} className="flex w-full items-center gap-2.5 px-3 py-1.5 text-left hover:bg-btn-hover">
+                  <Avatar name={o.name} size={18} square />
+                  <span className="min-w-0 flex-1 truncate text-fg">{o.name}</span>
+                  <span className="text-[11px] text-fg-subtle">{o.role}</span>
+                  {o.id === org.id ? <Check size={14} className="text-brand" /> : <span className="w-3.5" />}
+                </button>
+              ))}
+            </form>
+            <div className="my-1 h-px bg-line" />
+            <Link href="/onboarding?new=1" className="flex items-center gap-2.5 px-3 py-1.5 text-fg-muted hover:bg-btn-hover hover:text-fg">
+              <Plus size={14} /> New organisation
+            </Link>
+          </div>
+        </details>
         <BreadcrumbPage />
       </nav>
 

@@ -8,7 +8,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "pnpm --filter @brandrail/engine test",
-    "build:cli": "pnpm --filter @brandrail/cli build",
+    "build:cli": "pnpm --filter brandrail build",
     "build:action": "pnpm --filter @brandrail/github-action build"
   },
   "devDependencies": {

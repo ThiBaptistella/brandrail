@@ -58,7 +58,7 @@ const tools: Tool[] = [
     name: "All rule files",
     blurb: "Writes AGENTS.md (Codex), CLAUDE.md, Cursor, Copilot, Windsurf and Gemini rules from your published Brand Kit. --mcp also adds the MCP server to project configs.",
     file: "Terminal",
-    snippet: () => `npx @brandrail/cli init --from-api --mcp`,
+    snippet: () => `npx brandrail init --from-api --mcp`,
   },
 ];
 

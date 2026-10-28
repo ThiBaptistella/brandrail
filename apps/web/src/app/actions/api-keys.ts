@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { generateApiKey } from "@/lib/api-keys";
 import { isSupabaseConfigured } from "@/lib/env";
-import { requireOrg } from "@/lib/session";
+import { canWrite, requireOrg } from "@/lib/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type CreateKeyResult = { ok: true; key: string; name: string } | { ok: false; error: string };
@@ -21,7 +21,8 @@ export async function createApiKeyAction(name: string): Promise<CreateKeyResult>
     name: clean,
     prefix,
     key_hash: hash,
-    scopes: ["mcp:read", "checks:write"],
+    // Viewers get read-only keys: AI tools can read the Brand Kit, but nothing gets uploaded.
+    scopes: canWrite(org) ? ["mcp:read", "checks:write"] : ["mcp:read"],
   });
   if (error) return { ok: false, error: error.message };
   revalidatePath("/dashboard/connect");

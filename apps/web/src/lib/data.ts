@@ -3,7 +3,7 @@ import { ruleTitle as engineRuleTitle, starterConfig, type BrandrailConfig, type
 import { KIT_REGISTRY } from "./kit-registry";
 import { isSupabaseConfigured } from "./env";
 import * as mock from "./mock";
-import type { Organization } from "./session";
+import type { Organization, Role } from "./session";
 import { createSupabaseServerClient } from "./supabase/server";
 
 export type ScanSource = "ci" | "cli" | "mcp" | "worker";
@@ -403,4 +403,44 @@ export async function getOrgEngineConfig(org: Organization): Promise<{ config: B
     config: { tokenVersion: kit.version, tokens: kit.tokens as BrandrailConfig["tokens"], components },
     published: true,
   };
+}
+
+/* ───────── members & invitations ───────── */
+
+export type MemberRow = { userId: string; email: string; name: string; role: Role; joinedAt: string };
+export type InvitationRow = { id: string; email: string; role: Role; createdAt: string; expiresAt: string };
+export type MyInvitation = { id: string; orgName: string; orgSlug: string; role: Role; invitedBy: string | null };
+
+export async function listMembers(org: Organization, me: { id: string; email: string; name: string }): Promise<MemberRow[]> {
+  if (!isSupabaseConfigured) return [{ userId: me.id, email: me.email, name: me.name, role: org.role, joinedAt: new Date().toISOString() }];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.rpc("org_members", { p_org: org.id });
+  return ((data ?? []) as Array<{ user_id: string; email: string; name: string; role: Role; joined_at: string }>).map((m) => ({
+    userId: m.user_id,
+    email: m.email,
+    name: m.name,
+    role: m.role,
+    joinedAt: m.joined_at,
+  }));
+}
+
+export async function listInvitations(org: Organization): Promise<InvitationRow[]> {
+  if (!isSupabaseConfigured || (org.role !== "owner" && org.role !== "admin")) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("invitations").select("id, email, role, created_at, expires_at").eq("org_id", org.id).order("created_at", { ascending: false });
+  return (data ?? []).map((i) => ({ id: i.id, email: i.email, role: i.role as Role, createdAt: i.created_at, expiresAt: i.expires_at }));
+}
+
+export async function myInvitations(): Promise<MyInvitation[]> {
+  if (!isSupabaseConfigured) return [];
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("my_invitations");
+  if (error) return [];
+  return ((data ?? []) as Array<{ id: string; org_name: string; org_slug: string; role: Role; invited_by_email: string | null }>).map((i) => ({
+    id: i.id,
+    orgName: i.org_name,
+    orgSlug: i.org_slug,
+    role: i.role,
+    invitedBy: i.invited_by_email,
+  }));
 }

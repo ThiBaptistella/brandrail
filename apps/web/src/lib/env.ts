@@ -7,3 +7,5 @@ export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 export const DEMO_SESSION_COOKIE = "br_demo_session";
 export const ORG_COOKIE = "br_org";
+/** Which of the user's organisations the dashboard is showing. */
+export const CURRENT_ORG_COOKIE = "br_current_org";

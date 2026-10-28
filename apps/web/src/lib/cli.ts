@@ -1,4 +1,4 @@
-/** How users run the CLI. Until @brandrail/cli is published to npm, run it from this repo (see README). */
-export const CLI = "npx @brandrail/cli";
-export const CLI_NOT_PUBLISHED = true;
+/** How users run the CLI. Published to npm as `brandrail`. */
+export const CLI = "npx brandrail";
+export const CLI_NOT_PUBLISHED = false;
 export const ACTION_REF = "ThiBaptistella/brandrail/packages/github-action@main";

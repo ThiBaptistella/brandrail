@@ -1,17 +1,44 @@
 {
-  "name": "@brandrail/cli",
+  "name": "brandrail",
   "version": "0.1.0",
-  "description": "Check that your UI follows your design system. Brandrail CLI.",
+  "description": "Keep AI-generated UI on-brand: checks code and live pages against your design system, and wires your Brand Kit into Claude Code, Cursor, Copilot and Codex.",
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "lint",
+    "ai",
+    "mcp",
+    "claude",
+    "cursor",
+    "copilot",
+    "tailwind",
+    "brand"
+  ],
+  "homepage": "https://web-phi-nine-77.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThiBaptistella/brandrail.git",
+    "directory": "packages/cli"
+  },
+  "license": "UNLICENSED",
   "type": "module",
   "bin": {
     "brandrail": "./dist/brandrail.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --external:playwright --external:playwright-core --banner:js='#!/usr/bin/env node'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
     "@brandrail/engine": "workspace:*",

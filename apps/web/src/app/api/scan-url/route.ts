@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrgEngineConfig } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/env";
 import { normaliseScanUrl, ScanError, scanUrl } from "@/lib/scanner";
-import { getOrganizations, getUser } from "@/lib/session";
+import { canAdmin, canWrite, getCurrentOrg, getUser } from "@/lib/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -13,8 +13,9 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
-  const org = (await getOrganizations())[0];
+  const org = await getCurrentOrg();
   if (!org) return NextResponse.json({ error: "Create an organisation first." }, { status: 403 });
+  if (!canWrite(org)) return NextResponse.json({ error: "Viewers can't start scans." }, { status: 403 });
 
   let body: { url?: unknown; pages?: unknown };
   try {
@@ -51,6 +52,8 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof ScanError) return NextResponse.json({ error: e.message }, { status: 422 });
     console.error("scan-url failed", e);
-    return NextResponse.json({ error: "The scanner hit an unexpected error. Try again." }, { status: 500 });
+    // Owners and admins see the first line of the error, which is what you need to debug a deploy.
+    const detail = canAdmin(org) ? ` (${String((e as Error)?.message ?? e).split("\n")[0]!.slice(0, 300)})` : "";
+    return NextResponse.json({ error: `The scanner hit an unexpected error. Try again.${detail}` }, { status: 500 });
   }
 }
