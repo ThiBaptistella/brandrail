@@ -188,7 +188,9 @@ export async function getScan(org: Organization, id: string): Promise<{ scan: Sc
       .select("rule_id, severity, file, line, col, message, suggestion, snippet")
       .eq("scan_id", id)
       .order("file")
-      .order("line")
+      .order("line", { nullsFirst: true })
+      // Insertion order: the engine already sorts by severity and impact.
+      .order("id")
       .limit(1000),
   ]);
   if (!s) return null;
