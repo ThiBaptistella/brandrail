@@ -7,6 +7,8 @@ import {
   formatMarkdown,
   formatPretty,
   generateInstructions,
+  mcpClientConfigs,
+  RULE_FILES,
   resolveConfig,
   RULES,
   starterConfig,
@@ -34,7 +36,9 @@ Options for check
 
 Options for init
   --from-api             Pull the published Brand Kit (needs BRANDRAIL_KEY)
-  --no-rules             Don't write CLAUDE.md / AGENTS.md / Cursor / Copilot files
+  --no-rules             Don't write AGENTS.md (Codex), CLAUDE.md, Cursor, Copilot, Windsurf, Gemini rule files
+  --mcp                  Also add the Brandrail MCP server to .mcp.json, .cursor/mcp.json, .vscode/mcp.json
+                         and print the Codex / Windsurf config
   --force                Overwrite an existing brandrail.config.json
 
 Environment
@@ -132,22 +136,58 @@ async function cmdCheck(cwd: string, positional: string[], flags: Flags): Promis
 function writeRuleFiles(root: string, config: BrandrailConfig, org?: string): string[] {
   const md = generateInstructions(config, { org });
   const written: string[] = [];
-  const upsert = (rel: string, wrap = (s: string) => s) => {
+  const write = (rel: string, content: (before: string) => string) => {
     const abs = join(root, rel);
     mkdirSync(dirname(abs), { recursive: true });
     const before = existsSync(abs) ? readFileSync(abs, "utf8") : "";
-    writeFileSync(abs, upsertSection(before, wrap(md)));
+    writeFileSync(abs, content(before));
     written.push(rel);
   };
-  upsert("CLAUDE.md");
-  upsert("AGENTS.md");
-  upsert(".github/copilot-instructions.md");
-  // Cursor .mdc needs front-matter at the very top, so it's written whole.
-  const cursor = join(root, ".cursor/rules/brandrail.mdc");
-  mkdirSync(dirname(cursor), { recursive: true });
-  writeFileSync(cursor, `---\ndescription: Design system rules from Brandrail\nglobs: ["**/*.{tsx,jsx,vue,svelte,html,css,scss}"]\nalwaysApply: true\n---\n\n${md}\n`);
-  written.push(".cursor/rules/brandrail.mdc");
+  for (const { file, readBy } of RULE_FILES) {
+    if (file.endsWith(".mdc")) {
+      // Cursor rule files need front-matter at the very top, so they're written whole.
+      write(file, () => `---\ndescription: Design system rules from Brandrail\nglobs: ["**/*.{tsx,jsx,vue,svelte,html,css,scss}"]\nalwaysApply: true\n---\n\n${md}\n`);
+    } else if (file.startsWith(".windsurf/")) {
+      write(file, () => `---\ntrigger: always_on\n---\n\n${md}\n`);
+    } else {
+      write(file, (before) => upsertSection(before, md));
+    }
+    written[written.length - 1] = `${file}  (${readBy})`;
+  }
   return written;
+}
+
+/** Adds the brandrail server to project MCP configs, keeping any other servers already there. */
+function writeMcpConfigs(root: string): void {
+  const url = `${apiBase()}/api/mcp`;
+  for (const c of mcpClientConfigs(url)) {
+    if (!c.projectFile) continue;
+    const abs = join(root, c.file);
+    mkdirSync(dirname(abs), { recursive: true });
+    const ours = JSON.parse(c.content) as Record<string, Record<string, unknown> | unknown[]>;
+    let merged = ours;
+    if (existsSync(abs)) {
+      try {
+        const existing = JSON.parse(readFileSync(abs, "utf8")) as Record<string, unknown>;
+        merged = { ...existing } as typeof ours;
+        for (const [k, v] of Object.entries(ours)) {
+          if (Array.isArray(v)) {
+            const prev = (Array.isArray(existing[k]) ? existing[k] : []) as Array<{ id?: string }>;
+            merged[k] = [...prev.filter((x) => !v.some((y) => (y as { id?: string }).id === x.id)), ...v];
+          } else merged[k] = { ...((existing[k] as Record<string, unknown>) ?? {}), ...v };
+        }
+      } catch {
+        log(`warning: ${c.file} isn't valid JSON; left unchanged`);
+        continue;
+      }
+    }
+    writeFileSync(abs, `${JSON.stringify(merged, null, 2)}\n`);
+    log(`✔ added brandrail to ${c.file}  (${c.name})`);
+  }
+  for (const c of mcpClientConfigs(url).filter((x) => !x.projectFile)) {
+    log(`\n${c.name}: ${c.command ? `run\n  ${c.command}\nor add` : "add"} to ${c.file}:\n${c.content.replace(/^/gm, "  ")}`);
+  }
+  log("\nSet BRANDRAIL_KEY in your shell (an API key from Dashboard → Connect) before starting the AI tool.");
 }
 
 async function cmdInit(cwd: string, flags: Flags): Promise<number> {
@@ -169,6 +209,7 @@ async function cmdInit(cwd: string, flags: Flags): Promise<number> {
     log(`✔ wrote ${CONFIG_FILE}${org ? ` from ${org}'s Brand Kit` : " (starter tokens — edit them or use --from-api)"}`);
   }
   if (flags.rules !== false) for (const f of writeRuleFiles(cwd, config, org)) log(`✔ updated ${f}`);
+  if (flags.mcp) writeMcpConfigs(cwd);
   log("\nNext: npx brandrail check");
   return 0;
 }

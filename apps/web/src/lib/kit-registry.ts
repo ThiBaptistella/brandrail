@@ -1,0 +1,96 @@
+import type { ComponentEntry } from "@brandrail/engine";
+
+/**
+ * Registry entries for the Midrocks UI kit (@brandrail/kit), used by "Import from UI kit".
+ * Prop names match the kit's source in packages/kit/src/components.
+ */
+export const KIT_REGISTRY: Array<Omit<ComponentEntry, "importPath">> = [
+  {
+    name: "Button",
+    replaces: ["button", "input[type=submit]", "input[type=button]"],
+    aliases: ["Btn", "CTA"],
+    description: "Primary (cta), secondary (ghost) and destructive (danger) actions.",
+    usageRules: ["One cta Button per view", "Use type={ButtonType.GHOST} for secondary actions", "Use type={ButtonType.DANGER} only for destructive actions"],
+    example: `<Button label="Save" type={ButtonType.CTA} onClick={save} />`,
+    status: "stable",
+  },
+  {
+    name: "ButtonGroup",
+    aliases: ["SegmentedControl"],
+    description: "A row or column of related Buttons.",
+    example: `<ButtonGroup><Button label="Day" /><Button label="Week" /></ButtonGroup>`,
+    status: "stable",
+  },
+  {
+    name: "InputText",
+    replaces: ["input"],
+    aliases: ["TextInput", "TextField", "Input"],
+    description: "Single-line text, number or password field with label and caption.",
+    usageRules: ["Always pass a label", "Show help or errors with caption and state, not custom text"],
+    example: `<InputText label="Truck ID" placeholder="HT-204" value={id} onChange={(e) => setId(e.target.value)} />`,
+    status: "stable",
+  },
+  {
+    name: "InputTextArea",
+    replaces: ["textarea"],
+    aliases: ["Textarea", "MultilineInput"],
+    description: "Multi-line text field for notes and comments.",
+    example: `<InputTextArea label="Notes for workshop" />`,
+    status: "stable",
+  },
+  {
+    name: "Dropdown",
+    replaces: ["select"],
+    aliases: ["Select", "Picker", "Combobox"],
+    description: "Choose one option from a list. Children are ListItem.",
+    usageRules: ["Use for 5+ options; use RadioGroup for fewer"],
+    example: `<Dropdown selected={i} onChange={setI}>\n  <ListItem label="Brake inspection" value="brake" />\n</Dropdown>`,
+    status: "stable",
+  },
+  {
+    name: "Checkbox",
+    replaces: ["input[type=checkbox]"],
+    description: "A single on/off choice with a label.",
+    example: `<Checkbox label="Approved" checked={ok} onChange={(e) => setOk(e.target.checked)} />`,
+    status: "stable",
+  },
+  { name: "CheckboxGroup", description: "Several related checkboxes with a title.", status: "stable" },
+  {
+    name: "Radio",
+    replaces: ["input[type=radio]"],
+    description: "One option inside a RadioGroup.",
+    example: `<RadioGroup title="Shift"><Radio label="Day" checked /><Radio label="Night" /></RadioGroup>`,
+    status: "stable",
+  },
+  { name: "RadioGroup", description: "Pick exactly one of a few options.", status: "stable" },
+  {
+    name: "Toggle",
+    aliases: ["Switch"],
+    description: "Instant on/off setting, applied without a save button.",
+    example: `<Toggle label="Alerts" checked={on} onChange={setOn} />`,
+    status: "stable",
+  },
+  {
+    name: "DatePicker",
+    aliases: ["Calendar", "DateInput"],
+    description: "Pick a date or a date range from a calendar.",
+    example: `<DatePicker selectedDate={date} onChange={setDate} placeholder="Next service" />`,
+    status: "stable",
+  },
+  {
+    name: "Notification",
+    aliases: ["Toast", "Alert", "Banner", "Flash"],
+    description: "Info, success, warning or error message with optional close.",
+    usageRules: ["Use type to convey meaning, never a custom colour"],
+    example: `<Notification type={NotificationType.SUCCESS} title="Saved" message="Brand Kit published." />`,
+    status: "stable",
+  },
+  { name: "Tooltip", aliases: ["Hint"], description: "Short help text on hover or focus.", status: "stable" },
+  { name: "Avatar", description: "User picture or initials with presence state.", status: "stable" },
+  { name: "AvatarGroup", description: "Stack of avatars with an overflow count.", status: "stable" },
+  { name: "Breadcrumb", aliases: ["Trail"], description: "Shows where the page sits in the hierarchy.", status: "stable" },
+  { name: "Divider", aliases: ["Separator"], description: "Horizontal or vertical rule, optionally labelled.", status: "stable" },
+  { name: "Loader", aliases: ["Spinner"], description: "Indeterminate loading indicator.", status: "stable" },
+  { name: "ProgressBar", aliases: ["Progress", "Meter"], description: "Determinate progress from 0 to 100.", status: "stable" },
+  { name: "VideoPlayer", description: "Video with play, seek, volume and fullscreen controls.", status: "beta" },
+];

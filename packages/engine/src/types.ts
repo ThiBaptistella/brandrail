@@ -12,6 +12,15 @@ export interface ComponentEntry {
   importPath: string;
   /** Raw HTML elements this component replaces, e.g. ["button"]. Inferred from the name when omitted. */
   replaces?: string[];
+  /** What it's for, in a sentence. Used by find_component. */
+  description?: string;
+  /** Other names people use for it, e.g. ["modal", "popup"] for Dialog. */
+  aliases?: string[];
+  /** Do / don't rules shown to AI tools, e.g. "One primary Button per view". */
+  usageRules?: string[];
+  /** A short usage example (JSX). */
+  example?: string;
+  status?: "draft" | "beta" | "stable" | "deprecated";
 }
 
 /** brandrail.config.json */

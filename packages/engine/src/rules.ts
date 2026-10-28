@@ -237,6 +237,9 @@ export const fontFamily: Rule = {
   },
 };
 
+/** Input types that are text-like, so a generic "input" replacement applies. */
+const TEXT_INPUT_TYPES = new Set(["", "text", "email", "password", "number", "search", "tel", "url"]);
+
 export const preferOfficialComponent: Rule = {
   id: "prefer-official-component",
   title: "Re-invented component",
@@ -246,16 +249,23 @@ export const preferOfficialComponent: Rule = {
   check({ code, config }) {
     if (config.replaces.size === 0) return [];
     const out: Finding[] = [];
-    const tags = [...config.replaces.keys()].map((t) => t.replace(/[^a-z0-9-]/g, "")).join("|");
-    for (const m of matches(new RegExp(`<(${tags})(?=[\\s>/])([^>]*)>`, "g"), code)) {
+    const baseTags = [...new Set([...config.replaces.keys()].map((k) => k.replace(/\[.*$/, "").replace(/[^a-z0-9-]/g, "")))].filter(Boolean);
+    for (const m of matches(new RegExp(`<(${baseTags.join("|")})(?=[\\s>/])([^>]*)>`, "g"), code)) {
       const tag = m[1]!;
-      const comp = config.replaces.get(tag)!;
-      if (tag === "input" && /\btype\s*=\s*["'{]?\s*["']?(hidden|file)/.test(m[2]!)) continue;
+      const attrs = m[2]!;
+      let comp = config.replaces.get(tag);
+      if (tag === "input" || tag === "button") {
+        const type = (attrs.match(/\btype\s*=\s*\{?\s*["'`]([\w-]+)["'`]/)?.[1] ?? "").toLowerCase();
+        const specific = config.replaces.get(`${tag}[type=${type}]`);
+        if (specific) comp = specific;
+        else if (tag === "input" && !TEXT_INPUT_TYPES.has(type)) comp = type === "submit" || type === "button" ? config.replaces.get("button") : undefined;
+      }
+      if (!comp) continue;
       // Skip the component's own implementation file
       if (new RegExp(`(?:function|const|class)\\s+${comp.name}\\b`).test(code)) continue;
       out.push({
         offset: m.index,
-        message: `Raw <${tag}> re-implements ${comp.name}`,
+        message: `Raw <${tag}${tag === "input" && /type=/.test(attrs) ? ` type="${attrs.match(/type\s*=\s*\{?\s*["'`]([\w-]+)/)?.[1]}"` : ""}> re-implements ${comp.name}`,
         suggestion: `import { ${comp.name} } from "${comp.importPath}"`,
       });
     }

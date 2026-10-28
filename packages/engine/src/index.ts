@@ -7,3 +7,6 @@ export { parseColor, contrastRatio, deltaE, rgbToLab, toHex } from "./color.ts";
 export { fileKind, makeIgnore } from "./source.ts";
 export { starterConfig } from "./defaults.ts";
 export { generateInstructions, upsertSection, RULES_START, RULES_END } from "./instructions.ts";
+export { findComponents, findComponentByName, type ComponentMatch } from "./components.ts";
+export type { TokenColor } from "./config.ts";
+export { mcpClientConfigs, RULE_FILES, type McpClientConfig } from "./mcp-config.ts";

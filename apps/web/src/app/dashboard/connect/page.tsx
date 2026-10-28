@@ -11,6 +11,7 @@ import { requireOrg } from "@/lib/session";
 export const metadata: Metadata = { title: "Connect" };
 
 const mcpTools = [
+  { name: "get_guidelines", desc: "The full design system rules, read once before writing UI" },
   { name: "get_design_tokens", desc: "Semantic tokens with values and when to use them" },
   { name: "find_component", desc: "Best component for an intent, with import and example" },
   { name: "get_component_docs", desc: "Props, usage rules, do and don't" },
@@ -95,11 +96,14 @@ export default async function ConnectPage() {
             <BoxHeader>
               <Server size={15} className="text-fg-subtle" />
               <h2 className="text-[13px] font-medium text-fg">MCP server</h2>
-              <Label tone="attention" className="ml-auto">Next build</Label>
+              <Label tone="success" className="ml-auto">Live</Label>
             </BoxHeader>
             <BoxRow>
-              <div className="text-xs text-fg-subtle">Endpoint</div>
+              <div className="text-xs text-fg-subtle">Endpoint · Streamable HTTP · Bearer API key</div>
               <code className="mt-1 block truncate font-mono text-xs text-fg">{mcpUrl}</code>
+              <p className="mt-2 text-xs text-fg-subtle">
+                AI tools read your published Brand Kit and component registry. Each validate_snippet call shows up in Checks as an AI tool scan (code isn&apos;t stored).
+              </p>
             </BoxRow>
             <BoxRow>
               <div className="mb-2 text-xs text-fg-subtle">Tools (same rules engine as the CLI)</div>

@@ -104,7 +104,9 @@ var NAME_TO_TAGS = {
   textarea: ["textarea"],
   inputtextarea: ["textarea"],
   link: ["a"],
-  table: ["table"]
+  table: ["table"],
+  checkbox: ["input[type=checkbox]"],
+  radio: ["input[type=radio]"]
 };
 var GENERIC_FONTS = /* @__PURE__ */ new Set([
   "inherit",
@@ -180,7 +182,10 @@ function resolveConfig(config) {
   const replaces = /* @__PURE__ */ new Map();
   for (const c of components) {
     const tags = c.replaces ?? NAME_TO_TAGS[c.name.toLowerCase()] ?? [];
-    for (const t of tags) if (!replaces.has(t)) replaces.set(t.toLowerCase(), c);
+    for (const t of tags) {
+      const key = t.toLowerCase().replace(/\s+/g, "").replace(/["']/g, "");
+      if (!replaces.has(key)) replaces.set(key, c);
+    }
   }
   return {
     tokenVersion: config.tokenVersion,
@@ -389,6 +394,7 @@ var fontFamily = {
     return out;
   }
 };
+var TEXT_INPUT_TYPES = /* @__PURE__ */ new Set(["", "text", "email", "password", "number", "search", "tel", "url"]);
 var preferOfficialComponent = {
   id: "prefer-official-component",
   title: "Re-invented component",
@@ -398,15 +404,22 @@ var preferOfficialComponent = {
   check({ code, config }) {
     if (config.replaces.size === 0) return [];
     const out = [];
-    const tags = [...config.replaces.keys()].map((t) => t.replace(/[^a-z0-9-]/g, "")).join("|");
-    for (const m of matches(new RegExp(`<(${tags})(?=[\\s>/])([^>]*)>`, "g"), code)) {
+    const baseTags = [...new Set([...config.replaces.keys()].map((k) => k.replace(/\[.*$/, "").replace(/[^a-z0-9-]/g, "")))].filter(Boolean);
+    for (const m of matches(new RegExp(`<(${baseTags.join("|")})(?=[\\s>/])([^>]*)>`, "g"), code)) {
       const tag = m[1];
-      const comp = config.replaces.get(tag);
-      if (tag === "input" && /\btype\s*=\s*["'{]?\s*["']?(hidden|file)/.test(m[2])) continue;
+      const attrs = m[2];
+      let comp = config.replaces.get(tag);
+      if (tag === "input" || tag === "button") {
+        const type = (attrs.match(/\btype\s*=\s*\{?\s*["'`]([\w-]+)["'`]/)?.[1] ?? "").toLowerCase();
+        const specific = config.replaces.get(`${tag}[type=${type}]`);
+        if (specific) comp = specific;
+        else if (tag === "input" && !TEXT_INPUT_TYPES.has(type)) comp = type === "submit" || type === "button" ? config.replaces.get("button") : void 0;
+      }
+      if (!comp) continue;
       if (new RegExp(`(?:function|const|class)\\s+${comp.name}\\b`).test(code)) continue;
       out.push({
         offset: m.index,
-        message: `Raw <${tag}> re-implements ${comp.name}`,
+        message: `Raw <${tag}${tag === "input" && /type=/.test(attrs) ? ` type="${attrs.match(/type\s*=\s*\{?\s*["'`]([\w-]+)/)?.[1]}"` : ""}> re-implements ${comp.name}`,
         suggestion: `import { ${comp.name} } from "${comp.importPath}"`
       });
     }

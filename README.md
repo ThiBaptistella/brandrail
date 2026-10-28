@@ -53,6 +53,21 @@ The GitHub Action usage is in `packages/github-action/README.md`. Its `api-url` 
 API (API-key auth, used by CLI / Action / MCP):
 - `GET /api/v1/brand-kit` → published Brand Kit as a `brandrail.config.json`
 - `POST /api/v1/scans` → store a report; returns the dashboard URL
+- `POST /api/mcp` → MCP server (Streamable HTTP, stateless, `Authorization: Bearer <key>`)
+
+## MCP server
+
+Tools (all read-only, same engine as the CLI): `get_guidelines`, `get_design_tokens`, `find_component`,
+`get_component_docs`, `validate_snippet`. Each `validate_snippet` call is stored as an "AI tool" scan (no code kept).
+`find_component` searches the component registry (Dashboard → Components → Import from UI kit to seed it).
+
+```bash
+npx @brandrail/cli init --from-api --mcp   # rule files + .mcp.json, .cursor/mcp.json, .vscode/mcp.json
+codex mcp add brandrail --url $BRANDRAIL_API_URL/api/mcp --bearer-token-env-var BRANDRAIL_KEY
+```
+
+Rule files written by `init`: AGENTS.md (Codex and other agents), CLAUDE.md, .cursor/rules/brandrail.mdc,
+.github/copilot-instructions.md, .windsurf/rules/brandrail.md, GEMINI.md.
 
 ## Structure
 
@@ -83,7 +98,8 @@ supabase/migrations/   Postgres schema with row-level security
 - [ ] Reuse the kit's `scripts/figmaApi.js` + `generateThemes.js` for "Import from Figma"
 - [x] Save Brand Kit versions to `token_set_versions`
 - [x] `packages/engine` + CLI + GitHub Action + ingest API + real dashboard data
-- [ ] `apps/web/api/mcp` — MCP server (get_design_tokens, find_component, validate_snippet) on the same engine
-- [ ] Component registry editing (feeds `prefer-official-component`)
+- [x] MCP server at `/api/mcp` on the same engine
+- [x] Component registry editing + import from the UI kit
+- [ ] Brand Kit editor: add/remove colour tokens, spacing and radius scales (not just edit)
 - [ ] Publish `@brandrail/cli` to npm; deploy the web app (Vercel) so the Action can upload
 - [ ] `apps/worker` — Playwright URL scanner

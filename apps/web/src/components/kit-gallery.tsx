@@ -99,7 +99,7 @@ export function KitGallery() {
           <Toggle {...p} label="Alerts" checked={toggle} onChange={setToggle} size={Size.SMALL} />
           <Checkbox {...p} label="Approved" checked={checked} onChange={(e) => setChecked(e.target.checked)} size={Size.SMALL} />
           <RadioGroup {...p} size={Size.SMALL}>
-            <Radio {...p} name="shift" value="day" label="Day" defaultChecked />
+            <Radio {...p} name="shift" value="day" label="Day" checked />
             <Radio {...p} name="shift" value="night" label="Night" />
           </RadioGroup>
         </Cell>

@@ -13,7 +13,7 @@ export interface ResolvedConfig {
   /** Allowed first font families, lower-cased, quotes removed. */
   fonts: string[];
   components: ComponentEntry[];
-  /** html tag -> component that replaces it */
+  /** html tag (or tag[type=x]) -> component that replaces it */
   replaces: Map<string, ComponentEntry>;
   rules: Record<string, RuleSetting>;
   ignore: string[];
@@ -68,6 +68,8 @@ const NAME_TO_TAGS: Record<string, string[]> = {
   inputtextarea: ["textarea"],
   link: ["a"],
   table: ["table"],
+  checkbox: ["input[type=checkbox]"],
+  radio: ["input[type=radio]"],
 };
 
 const GENERIC_FONTS = new Set([
@@ -161,7 +163,10 @@ export function resolveConfig(config: BrandrailConfig): ResolvedConfig {
   const replaces = new Map<string, ComponentEntry>();
   for (const c of components) {
     const tags = c.replaces ?? NAME_TO_TAGS[c.name.toLowerCase()] ?? [];
-    for (const t of tags) if (!replaces.has(t)) replaces.set(t.toLowerCase(), c);
+    for (const t of tags) {
+      const key = t.toLowerCase().replace(/\s+/g, "").replace(/["']/g, "");
+      if (!replaces.has(key)) replaces.set(key, c);
+    }
   }
 
   return {

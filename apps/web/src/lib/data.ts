@@ -1,5 +1,6 @@
 import "server-only";
-import { RULES, starterConfig, type BrandrailConfig } from "@brandrail/engine";
+import { RULES, starterConfig, type BrandrailConfig, type ComponentEntry } from "@brandrail/engine";
+import { KIT_REGISTRY } from "./kit-registry";
 import { isSupabaseConfigured } from "./env";
 import * as mock from "./mock";
 import type { Organization } from "./session";
@@ -337,12 +338,50 @@ export async function listApiKeys(org: Organization): Promise<{ rows: ApiKeyRow[
   };
 }
 
+export interface RegistryComponent extends ComponentEntry {
+  id: string;
+  updatedAt: string | null;
+}
+
+const COMPONENT_COLS = "id, name, import_path, description, usage_rules, status, replaces, aliases, example, updated_at";
+type ComponentDb = {
+  id: string;
+  name: string;
+  import_path: string;
+  description: string | null;
+  usage_rules: string[] | null;
+  status: ComponentEntry["status"];
+  replaces: string[] | null;
+  aliases: string[] | null;
+  example: string | null;
+  updated_at: string | null;
+};
+const toComponent = (c: ComponentDb): RegistryComponent => ({
+  id: c.id,
+  name: c.name,
+  importPath: c.import_path,
+  description: c.description ?? undefined,
+  usageRules: c.usage_rules?.length ? c.usage_rules : undefined,
+  status: c.status ?? "stable",
+  replaces: c.replaces?.length ? c.replaces : undefined,
+  aliases: c.aliases?.length ? c.aliases : undefined,
+  example: c.example ?? undefined,
+  updatedAt: c.updated_at,
+});
+
+const demoRegistry = (): RegistryComponent[] =>
+  KIT_REGISTRY.map((c, i) => ({ ...c, id: `demo-${i}`, importPath: "@brandrail/kit", updatedAt: null }));
+
+export async function listComponents(org: Organization): Promise<{ rows: RegistryComponent[]; sample: boolean }> {
+  if (!isSupabaseConfigured) return { rows: demoRegistry(), sample: true };
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("components").select(COMPONENT_COLS).eq("org_id", org.id).order("name");
+  return { rows: ((data ?? []) as ComponentDb[]).map(toComponent), sample: false };
+}
+
 /** The org's published Brand Kit as an engine config (falls back to the starter kit). */
 export async function getOrgEngineConfig(org: Organization): Promise<{ config: BrandrailConfig; published: boolean }> {
-  const demoComponents = mock.registryComponents
-    .filter((c) => c.status !== "draft")
-    .map((c) => ({ name: c.name, importPath: c.importPath }));
-  if (!isSupabaseConfigured) return { config: { ...starterConfig, components: demoComponents }, published: false };
+  if (!isSupabaseConfigured) return { config: { ...starterConfig, components: demoRegistry() }, published: false };
 
   const supabase = await createSupabaseServerClient();
   const [{ data: kit }, { data: comps }] = await Promise.all([
@@ -354,9 +393,11 @@ export async function getOrgEngineConfig(org: Organization): Promise<{ config: B
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase.from("components").select("name, import_path").eq("org_id", org.id).neq("status", "deprecated"),
+    supabase.from("components").select(COMPONENT_COLS).eq("org_id", org.id).neq("status", "deprecated"),
   ]);
-  const components = (comps ?? []).map((c) => ({ name: c.name, importPath: c.import_path }));
+  const components: ComponentEntry[] = ((comps ?? []) as ComponentDb[])
+    .map(toComponent)
+    .map(({ id: _id, updatedAt: _updatedAt, ...entry }) => entry);
   if (!kit) return { config: { ...starterConfig, components: components.length ? components : starterConfig.components }, published: false };
   return {
     config: { tokenVersion: kit.version, tokens: kit.tokens as BrandrailConfig["tokens"], components },

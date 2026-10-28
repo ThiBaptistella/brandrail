@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { check, checkSnippet, computeScore, formatGithubAnnotations, formatMarkdown, resolveConfig, starterConfig } from "../src/index.ts";
+import { check, checkSnippet, computeScore, findComponentByName, findComponents, formatGithubAnnotations, formatMarkdown, generateInstructions, resolveConfig, starterConfig } from "../src/index.ts";
 import { globToRegExp, stripComments } from "../src/source.ts";
 
 const cfg = starterConfig;
@@ -159,4 +159,50 @@ test("glob matcher", () => {
   assert.ok(globToRegExp("**/*.stories.*").test("src/Button.stories.tsx"));
   assert.ok(globToRegExp("src/{legacy,old}/**").test("src/old/x.tsx"));
   assert.ok(!globToRegExp("src/*.tsx").test("src/a/b.tsx"));
+});
+
+test("findComponents ranks by name, aliases, synonyms and description", () => {
+  const reg = {
+    components: [
+      { name: "Button", importPath: "@acme/ui", description: "Triggers an action" },
+      { name: "DatePicker", importPath: "@acme/ui", description: "Pick a date or a date range" },
+      { name: "Dialog", importPath: "@acme/ui", aliases: ["Modal"] },
+      { name: "Select", importPath: "@acme/ui", description: "Choose one option from a list" },
+      { name: "OldButton", importPath: "@acme/legacy", status: "deprecated" as const },
+    ],
+  };
+  assert.equal(findComponents(reg, "primary action button")[0]!.component.name, "Button");
+  assert.equal(findComponents(reg, "calendar to schedule a service")[0]!.component.name, "DatePicker");
+  assert.equal(findComponents(reg, "popup modal")[0]!.component.name, "Dialog");
+  assert.equal(findComponents(reg, "dropdown of trucks")[0]!.component.name, "Select");
+  assert.ok(!findComponents(reg, "button").some((m) => m.component.name === "OldButton"));
+  assert.equal(findComponentByName(reg, "modal")?.name, "Dialog");
+  assert.deepEqual(findComponents(reg, "zzz"), []);
+  // No dialog in this registry: nothing unrelated should come back.
+  assert.deepEqual(findComponents({ components: reg.components.filter((c) => c.name !== "Dialog") }, "popup modal"), []);
+});
+
+test("generateInstructions lists components, tokens and the validate step", () => {
+  const md = generateInstructions(starterConfig, { org: "Acme" });
+  assert.match(md, /`Button` from `@acme\/ui` \(instead of <button>\)/);
+  assert.match(md, /var\(--color-action-primary\)/);
+  assert.match(md, /validate_snippet/);
+});
+
+test("prefer-official-component is input-type aware", () => {
+  const reg = {
+    ...cfg,
+    components: [
+      { name: "InputText", importPath: "@k/ui", replaces: ["input"] },
+      { name: "Checkbox", importPath: "@k/ui" },
+      { name: "Button", importPath: "@k/ui" },
+    ],
+  };
+  const msgs = (code: string) => checkSnippet(code, "a.tsx", reg).violations.filter((v) => v.ruleId === "prefer-official-component").map((v) => v.message);
+  assert.deepEqual(msgs(`<input type="checkbox" />`), [`Raw <input type="checkbox"> re-implements Checkbox`]);
+  assert.deepEqual(msgs(`<input type="email" />`), [`Raw <input type="email"> re-implements InputText`]);
+  assert.deepEqual(msgs(`<input />`), [`Raw <input> re-implements InputText`]);
+  assert.deepEqual(msgs(`<input type="radio" />`), []);
+  assert.deepEqual(msgs(`<input type="submit" />`), [`Raw <input type="submit"> re-implements Button`]);
+  assert.deepEqual(msgs(`<input type={"range"} />`), []);
 });
