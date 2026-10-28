@@ -1,0 +1,63 @@
+
+    /* 🔹 Theme: themeB - Light Mode */
+    :root .themeB.light {
+      
+  --baseBorder: #e7e5e4;
+  --baseDisabled: #1a1a1a2e;
+  --baseFill1: #f1f5f9;
+  --baseFill2: #e1e7ef;
+  --baseFill3: #c8d6e5;
+  --baseFill4: #9eacc0;
+  --baseFill5: #344256;
+  --baseSurface1: #ffffff;
+  --baseSurface2: #f8fafc;
+  --baseSurface3: #f1f5f9;
+  --stateBrandActive: #0f1729;
+  --stateBrandHover: #1d283a;
+  --stateBrandSelected: #48566a;
+  --stateDangerActive: #cb1a41;
+  --stateDangerHover: #fb657c;
+  --stateDangerSelected: #fec3ca;
+  --stateHighlightActive: #8318e7;
+  --stateHighlightHover: #b774fc;
+  --stateHighlightSelected: #ead6ff;
+  --stateSuccessActive: #0c887e;
+  --stateSuccessHover: #2bd4bd;
+  --stateSuccessSelected: #5dead5;
+  --stateWarningActive: #e4570c;
+  --stateWarningHover: #fb923c;
+  --stateWarningSelected: #fdba72;
+
+    }
+
+    /* 🔹 Theme: themeB - Dark Mode */
+    :root .themeB.dark {
+      
+  --baseBorder: #4f4944;
+  --baseDisabled: #ffffff2e;
+  --baseFill1: #1a2332;
+  --baseFill2: #252e3c;
+  --baseFill3: #323b49;
+  --baseFill4: #5e6d82;
+  --baseFill5: #d4dce8;
+  --baseSurface1: #141414;
+  --baseSurface2: #0c101c;
+  --baseSurface3: #1a2332;
+  --stateBrandActive: #f8fafc;
+  --stateBrandHover: #e2ebf3;
+  --stateBrandSelected: #b1c0d2;
+  --stateDangerActive: #fda5af;
+  --stateDangerHover: #f43e5c;
+  --stateDangerSelected: #a81036;
+  --stateHighlightActive: #e9a0ff;
+  --stateHighlightHover: #ab57ff;
+  --stateHighlightSelected: #6b1daf;
+  --stateSuccessActive: #5dead5;
+  --stateSuccessHover: #12a18f;
+  --stateSuccessSelected: #11736b;
+  --stateWarningActive: #fdba72;
+  --stateWarningHover: #f27013;
+  --stateWarningSelected: #ce5a07;
+
+    }
+  

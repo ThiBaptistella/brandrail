@@ -1,0 +1,36 @@
+.button-group {
+  display: flex;
+  width: 100%;
+
+  &.group-horizontal {
+    flex-direction: row;
+  }
+
+  &.group-vertical {
+    flex-direction: column;
+  }
+
+  &.group-horizontal > .buttonContainer:first-child {
+    border-radius: var(--defaultRadius-rad3) 0 0 var(--defaultRadius-rad3);
+  }
+
+  &.group-horizontal > .buttonContainer:last-child {
+    border-radius: 0 var(--defaultRadius-rad3) var(--defaultRadius-rad3) 0;
+  }
+
+  &.group-horizontal > .buttonContainer:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+
+  &.group-vertical > .buttonContainer:first-child {
+    border-radius: var(--defaultRadius-rad3) var(--defaultRadius-rad3) 0 0;
+  }
+
+  &.group-vertical > .buttonContainer:last-child {
+    border-radius: 0 0 var(--defaultRadius-rad3) var(--defaultRadius-rad3);
+  }
+
+  &.group-vertical > .buttonContainer:not(:first-child):not(:last-child) {
+    border-radius: 0;
+  }
+}

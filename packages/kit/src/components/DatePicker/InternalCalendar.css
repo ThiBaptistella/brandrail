@@ -1,0 +1,190 @@
+.calendar {
+  text-align: center;
+  font-family: var(--fontA-fontFamily);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacing6);
+  position: absolute;
+  z-index: 10;
+  background: var(--baseSurface1);
+  border: var(--strokeSm) solid var(--baseBorder);
+  border-radius: var(--defaultRadius-rad3);
+  padding: var(--spacing6);
+  margin-top: var(--spacing5);
+
+  & .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & button {
+      display: flex;
+      padding: var(--spacing0) var(--spacing7);
+      justify-content: center;
+      align-items: center;
+      gap: var(--spacing5);
+      border-radius: var(--defaultRadius-rad3);
+      border: var(--strokeSm) solid var(--baseBorder);
+      background: var(--baseSurface1);
+      height: 36px;
+
+      & .icon-left {
+        transform: rotate(270deg);
+        color: var(--baseFill4);
+      }
+
+      & .icon-right {
+        transform: rotate(90deg);
+        color: var(--baseFill4);
+      }
+    }
+
+    & span {
+      color: var(--textDarkSecondary);
+    }
+  }
+
+  & .calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: var(--fontSizeBase);
+    color: var(--baseFill4);
+    text-align: center;
+
+    & .weekday {
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  & .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    justify-items: center;
+    align-items: center;
+
+    & button {
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--textDarkSecondary);
+
+      &.calendar-day-small {
+        width: 48px;
+        height: 44px;
+      }
+
+      &.calendar-day-medium {
+        width: 60px;
+        height: 56px;
+      }
+
+      &.calendar-day-large {
+        width: 76px;
+        height: 72px;
+      }
+
+      &.current-day {
+        border: 2px solid var(--stateBrandActive);
+      }
+
+      &.event-day {
+        background: var(--baseFill1);
+        color: var(--baseSurface1);
+      }
+
+      &.selected {
+        background: var(--stateBrandActive);
+
+        & .circle {
+          background: var(--baseSurface1);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          text-align: center;
+          color: var(--stateBrandActive);
+        }
+      }
+
+      &.outside-month {
+        color: var(--textDarkTertiary);
+
+        &.event-day {
+          background: var(--baseFill1);
+          color: var(--baseSurface1);
+        }
+      }
+
+      &.range-start {
+        background: var(--stateBrandActive);
+
+        & .circle {
+          background: var(--baseSurface1);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          text-align: center;
+          color: var(--stateBrandActive);
+        }
+      }
+
+      &.range-end {
+        background: var(--stateBrandActive);
+
+        & .circle {
+          background: var(--baseSurface1);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          text-align: center;
+          color: var(--stateBrandActive);
+        }
+      }
+
+      &.in-range {
+        background: var(--stateBrandActive);
+
+        & .circle {
+          background: var(--baseSurface1);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          text-align: center;
+          color: var(--stateBrandActive);
+        }
+      }
+
+      & .circle {
+        background: var(--stateBrandActive);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        text-align: center;
+      }
+    }
+  }
+}

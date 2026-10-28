@@ -1,0 +1,95 @@
+@import "tailwindcss";
+@import "@brandrail/tokens/theme.css";
+
+@source "../../../../packages/ui/src";
+
+@theme inline {
+  --color-canvas: var(--br-canvas-default);
+  --color-canvas-subtle: var(--br-canvas-subtle);
+  --color-canvas-inset: var(--br-canvas-inset);
+  --color-overlay: var(--br-canvas-overlay);
+  --color-header: var(--br-header-bg);
+
+  --color-fg: var(--br-fg-default);
+  --color-fg-muted: var(--br-fg-muted);
+  --color-fg-subtle: var(--br-fg-subtle);
+  --color-on-emphasis: var(--br-fg-on-emphasis);
+
+  --color-line: var(--br-border-default);
+  --color-line-muted: var(--br-border-muted);
+
+  --color-accent: var(--br-accent-fg);
+  --color-accent-emphasis: var(--br-accent-emphasis);
+  --color-accent-subtle: var(--br-accent-subtle);
+  --color-accent-muted: var(--br-accent-muted);
+
+  --color-success: var(--br-success-fg);
+  --color-success-emphasis: var(--br-success-emphasis);
+  --color-success-hover: var(--br-success-emphasis-hover);
+  --color-success-subtle: var(--br-success-subtle);
+
+  --color-attention: var(--br-attention-fg);
+  --color-attention-subtle: var(--br-attention-subtle);
+
+  --color-danger: var(--br-danger-fg);
+  --color-danger-emphasis: var(--br-danger-emphasis);
+  --color-danger-subtle: var(--br-danger-subtle);
+
+  --color-done: var(--br-done-fg);
+  --color-done-subtle: var(--br-done-subtle);
+
+  --color-btn: var(--br-btn-bg);
+  --color-btn-hover: var(--br-btn-hover-bg);
+  --color-btn-border: var(--br-btn-border);
+
+  --font-sans: var(--br-font-sans);
+  --font-mono: var(--br-font-mono);
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--br-canvas-default);
+    color: var(--br-fg-default);
+    font-family: var(--br-font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--br-accent-muted);
+  }
+}
+
+/* Marketing page: always the dark GitHub-home look regardless of theme */
+.marketing {
+  --br-canvas-default: #0d1117;
+  --br-fg-default: #f0f6fc;
+  --br-fg-muted: #9198a1;
+  --br-border-default: #3d444d;
+  --br-btn-bg: #212830;
+  --br-btn-hover-bg: #262c36;
+  --br-btn-border: #3d444d;
+  --br-accent-fg: #4493f8;
+  --br-success-emphasis: #238636;
+  --br-success-emphasis-hover: #29903b;
+  color-scheme: dark;
+  background: #0d1117;
+  color: #f0f6fc;
+}
+
+.hero-glow {
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgba(56, 139, 253, 0.28) 0%, rgba(13, 17, 23, 0) 70%),
+    radial-gradient(40% 40% at 85% 30%, rgba(163, 113, 247, 0.22) 0%, rgba(13, 17, 23, 0) 70%),
+    radial-gradient(35% 35% at 12% 40%, rgba(46, 160, 67, 0.18) 0%, rgba(13, 17, 23, 0) 70%);
+}
+
+.grid-lines {
+  background-image:
+    linear-gradient(rgba(240, 246, 252, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 246, 252, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 75%);
+}

@@ -1,0 +1,118 @@
+.avatarContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--stateBrandActive);
+  color: var(--textLightPrimary);
+  text-transform: uppercase;
+  position: relative;
+  overflow: inherit;
+
+  & .image-small {
+    width: 30px;
+    height: 30px;
+  }
+
+  & .image-medium {
+    width: 38px;
+    height: 38px;
+  }
+
+  & .image-large {
+    width: 42px;
+    height: 42px;
+  }
+
+  & .avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  & .avatarInitials {
+    font-family: var(--fontA-fontFamily);
+    font-weight: var(--fontA-fontWeightSemiBold);
+  }
+
+  /* Sizing */
+  &.avatar-small {
+    width: 32px;
+    height: 32px;
+    font-size: var(--fontA-fontSizeXs);
+    line-height: var(--fontA-lineHeightXs);
+  }
+
+  &.avatar-medium {
+    width: 40px;
+    height: 40px;
+    font-size: var(--fontA-fontSizeSm);
+    line-height: var(--fontA-lineHeightSm);
+  }
+
+  &.avatar-large {
+    width: 44px;
+    height: 44px;
+    font-size: var(--fontA-fontSizeBase);
+    line-height: var(--fontA-lineHeightBase);
+  }
+
+  & .button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--iconMd);
+  }
+
+  & .button-icon:first-child {
+    margin-right: var(--spacing5);
+  }
+
+  & .button-icon:last-child {
+    margin-left: var(--spacing5);
+  }
+
+  /* Status Indicators */
+  & .avatarStatus {
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    border-radius: 50%;
+
+    &.status-online {
+      background-color: var(--stateSuccessActive);
+    }
+
+    &.status-away {
+      background-color: var(--stateWarningActive);
+    }
+
+    &.status-busy {
+      background-color: var(--stateDangerActive);
+    }
+
+    &.status-offline {
+      background-color: var(--baseFill5);
+    }
+
+    /* Status Sizing */
+    &.status-small {
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--baseSurface1);
+    }
+
+    &.status-medium {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid var(--baseSurface1);
+    }
+
+    &.status-large {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--baseSurface1);
+    }
+  }
+}

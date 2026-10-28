@@ -1,0 +1,43 @@
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-family: var(--fontA-fontFamily);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--textDarkSecondary);
+  }
+
+  &.small {
+    gap: var(--spacing5);
+
+    & .radio-text {
+      font-size: var(--fontA-fontSizeSm);
+    }
+  }
+
+  &.medium {
+    gap: var(--spacing6);
+
+    & .radio-text {
+      font-size: var(--fontA-fontSizeMd);
+    }
+  }
+
+  &.large {
+    gap: var(--spacing7);
+
+    & .radio-text {
+      font-size: var(--fontA-fontSizeLg);
+    }
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    color: var(--baseDisabled);
+  }
+
+  & .radio-text {
+    color: var(--textDarkPrimary);
+  }
+}

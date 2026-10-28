@@ -1,0 +1,7 @@
+/* All kit theme layers. Component CSS is imported by each component. */
+@import "./themes/global.css";
+@import "./themes/light.css";
+@import "./themes/dark.css";
+@import "./themes/themeA.css";
+@import "./themes/themeB.css";
+@import "./themes/brandrail.css";

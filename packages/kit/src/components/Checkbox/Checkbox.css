@@ -1,0 +1,32 @@
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: var(--spacing5);
+  font-family: var(--fontA-fontFamily);
+
+  &:hover {
+    color: var(--textDarkSecondary);
+  }
+
+  &.checkbox-label-small {
+    font-size: var(--fontA-fontSizeSm);
+  }
+
+  &.checkbox-label-medium {
+    font-size: var(--fontA-fontSizeMd);
+  }
+
+  &.checkbox-label-large {
+    font-size: var(--fontA-fontSizeLg);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    color: var(--baseDisabled);
+  }
+
+  & .checkbox-text {
+    color: var(--textDarkPrimary);
+  }
+}

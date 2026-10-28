@@ -1,0 +1,60 @@
+.avatarLabelContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing7);
+  flex-direction: row;
+
+  &.reverse {
+    flex-direction: row-reverse;
+  }
+
+  & .avatarText {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--fontA-fontFamily);
+
+    &.text-small {
+      font-size: var(--fontA-fontSizeXs);
+    }
+
+    &.text-medium {
+      font-size: var(--fontA-fontSizeSm);
+    }
+
+    &.text-large {
+      font-size: var(--fontA-fontSizeBase);
+    }
+  }
+
+  & .avatarName {
+    font-weight: var(--fontA-fontWeightSemiBold);
+    color: var(--textDarkPrimary);
+  }
+
+  & .avatarCaption {
+    color: var(--textDarkTertiary);
+    font-weight: 500;
+  }
+
+  & .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--baseFill5);
+
+    &.small {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.medium {
+      width: 24px;
+      height: 24px;
+    }
+
+    &.large {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}

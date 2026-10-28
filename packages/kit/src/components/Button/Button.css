@@ -1,0 +1,121 @@
+.buttonContainer {
+  justify-content: center;
+  align-items: center;
+  font-family: var(--fontA-fontFamily);
+  border-radius: var(--defaultRadius-rad3);
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &.button-cta {
+    background-color: var(--stateBrandActive);
+    color: var(--textLightPrimary);
+
+    &:hover {
+      background-color: var(--stateBrandHover);
+      cursor: pointer;
+    }
+
+    &:active {
+      background-color: var(--stateBrandSelected);
+    }
+
+    &:disabled {
+      background-color: var(--baseFill1);
+      cursor: not-allowed;
+      color: var(--baseDisabled);
+    }
+  }
+
+  &.button-ghost {
+    border: var(--strokeSm) solid var(--baseBorder);
+    background-color: var(--baseSurface1);
+    color: var(--stateBrandActive);
+
+    &:hover,
+    &.button-hover {
+      border: var(--strokeSm) solid var(--stateBrandHover);
+    }
+
+    &:active,
+    &.button-pressed {
+      border: var(--strokeSm) solid var(--stateBrandSelected);
+    }
+
+    &:disabled,
+    &.button-disabled {
+      background-color: var(--baseFill1);
+      cursor: not-allowed;
+      color: var(--baseDisabled);
+    }
+  }
+
+  &.button-danger {
+    background-color: var(--stateDangerActive);
+    color: var(--baseSurface1);
+
+    &:hover,
+    &.button-hover {
+      background-color: var(--stateDangerHover);
+    }
+
+    &:active,
+    &.button-pressed {
+      background-color: var(--stateDangerActive);
+    }
+
+    &:disabled,
+    &.button-disabled {
+      background-color: var(--baseFill1);
+      cursor: not-allowed;
+      color: var(--baseDisabled);
+    }
+  }
+
+  &.button-small {
+    padding: 0px var(--spacing7);
+    gap: var(--spacing5);
+    font-size: var(--fontA-fontSizeSm);
+    height: 36px;
+  }
+
+  &.button-medium {
+    padding: 0px var(--spacing8);
+    gap: var(--spacing6);
+    font-size: var(--fontA-fontSizeBase);
+    height: 44px;
+  }
+
+  &.button-large {
+    padding: 0px var(--spacing8);
+    gap: var(--spacing8);
+    font-size: var(--fontA-fontSizeLg);
+    height: 44px;
+  }
+
+  & .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--baseSurface1);
+
+    &.small {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.medium {
+      width: 24px;
+      height: 24px;
+    }
+
+    &.large {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}

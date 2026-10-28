@@ -1,0 +1,111 @@
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing4);
+  font-family: var(--fontA-fontFamily);
+
+  &.small {
+    gap: var(--spacing4);
+    height: 36px;
+  }
+
+  &.medium {
+    gap: var(--spacing5);
+    height: 44px;
+  }
+
+  &.large {
+    gap: var(--spacing7);
+    height: 56px;
+  }
+
+  /* Label */
+  & .input-label {
+    font-weight: 400;
+    color: var(--textDarkSecondary);
+
+    &.small {
+      font-size: var(--fontA-fontSizeSm);
+    }
+
+    &.medium {
+      font-size: var(--fontA-fontSizeBase);
+    }
+
+    &.large {
+      font-size: var(--fontA-fontSizeLg);
+    }
+  }
+
+  /* Input Wrapper */
+  & .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing5);
+    border: var(--strokeSm) solid var(--baseBorder);
+    border-radius: var(--defaultRadius-rad3);
+    background: var(--baseSurface1);
+    padding: var(--spacing4) var(--spacing7) var(--spacing4) var(--spacing7);
+    transition: border-color 0.2s ease-in-out;
+    height: 100%;
+
+    &:hover {
+      background: var(--baseFill1);
+      cursor: pointer;
+    }
+  }
+
+  /* Input Field */
+  & .input-text {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: var(--fontA-fontSizeBase);
+    color: var(--textDarkPrimary);
+    background: transparent;
+    width: 100%;
+
+    /* Placeholder */
+    &::placeholder {
+      color: var(--textDarkTertiary);
+    }
+  }
+
+  /* Icons */
+  & .input-icon-left,
+  & .input-icon-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--textDarkSecondary);
+  }
+
+  /* States */
+  &.input-focused .input-wrapper {
+    border: var(--strokeSm) solid var(--stateBrandActive);
+  }
+
+  &.input-error .input-wrapper {
+    border-color: var(--stateDangerActive);
+  }
+
+  &.input-success .input-wrapper {
+    border-color: var(--stateSuccessActive);
+  }
+
+  /* Disabled */
+  &.input-disabled .input-wrapper {
+    background: var(--baseFill1);
+    border-color: var(--baseDisabled);
+    pointer-events: none;
+
+    & .input-icon-right,
+    & .input-icon-left {
+      color: var(--baseDisabled);
+    }
+  }
+
+  &.input-disabled .input-text {
+    color: var(--baseDisabled);
+  }
+}

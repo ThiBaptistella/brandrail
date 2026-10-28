@@ -1,0 +1,74 @@
+.dropdown-list-item {
+  padding: var(--spacing5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing12);
+  cursor: pointer;
+  transition: 0.2s;
+  color: var(--textDarkSecondary);
+  font-family: var(--fontA-fontFamily);
+
+  &:hover {
+    background-color: var(--baseFill1);
+  }
+
+  /* Selected Item */
+  &[aria-selected="true"] {
+    background-color: var(--stateBrandActive);
+    color: var(--textLightPrimary);
+
+    & .caption {
+      color: var(--textLightSecondary);
+    }
+  }
+
+  &[aria-disabled="true"] {
+    color: var(--baseDisabled);
+
+    & .caption {
+      color: var(--textDarkTertiary);
+    }
+
+    & .icon {
+      color: var(--baseDisabled);
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  & .left-content,
+  & .right-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing5);
+  }
+
+  & .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  & .caption {
+    color: var(--textDarkTertiary);
+  }
+
+  /* Sizes * continuar aqui*/
+  &.dropdown-list-item-small {
+    font-size: var(--fontA-fontSizeSm);
+    padding: var(--spacing5);
+  }
+
+  &.dropdown-list-item-medium {
+    font-size: var(--fontA-fontSizeBase);
+    padding: var(--spacing6);
+  }
+
+  &.dropdown-list-item-large {
+    font-size: var(--fontA-fontSizeLg);
+    padding: var(--spacing7);
+  }
+}

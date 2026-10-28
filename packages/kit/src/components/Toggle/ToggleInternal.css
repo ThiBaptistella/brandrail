@@ -1,0 +1,97 @@
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  & .toggle-input {
+    display: none;
+  }
+
+  & .toggle-slider {
+    /* padding: var(--spacing2); */
+    background: var(--baseFill2);
+    border-radius: var(--defaultRadius-rad4);
+    position: relative;
+    transition: background 0.3s;
+    border: var(--strokeSm) solid transparent;
+
+    &:hover {
+      border: var(--strokeSm) solid var(--stateBrandSelected);
+    }
+  }
+
+  &.toggle-checked .toggle-slider {
+    background: var(--stateBrandActive);
+  }
+
+  & .toggle-slider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    width: 18px;
+    height: 15px;
+    background: var(--baseSurface1);
+    border-radius: var(--defaultRadius-rad3);
+    transform: translateY(-50%);
+    transition: transform 0.3s;
+    box-shadow: 0.5px 0.5px 3px 0px var(--colorsAlphaDark50);
+  }
+
+  &.toggle-small.toggle-checked .toggle-slider::before {
+    transform: translate(16px, -50%);
+  }
+
+  &.toggle-medium.toggle-checked .toggle-slider::before {
+    transform: translate(20px, -50%);
+  }
+
+  &.toggle-large.toggle-checked .toggle-slider::before {
+    transform: translate(24px, -50%);
+  }
+
+  &.toggle-disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+
+    & .toggle-slider {
+      background: var(--baseFill1);
+    }
+
+    & .toggle-slider::before {
+      background: var(--baseFill2);
+    }
+  }
+
+  &.toggle-small .toggle-slider {
+    width: 40px;
+    height: 19px;
+
+    &::before {
+      width: 18px;
+      height: 15px;
+    }
+  }
+
+  &.toggle-medium .toggle-slider {
+    width: 48px;
+    height: 24px;
+
+    &::before {
+      width: 22px;
+      height: 20px;
+    }
+  }
+
+  &.toggle-large .toggle-slider {
+    width: 56px;
+    height: 32px;
+
+    &::before {
+      width: 26px;
+      height: 24px;
+    }
+  }
+}

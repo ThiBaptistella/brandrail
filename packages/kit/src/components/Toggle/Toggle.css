@@ -1,0 +1,31 @@
+.toggle-label-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing7);
+  flex-direction: row;
+
+  & .toggle-label-text {
+    font-family: var(--fontA-fontFamily);
+    font-size: var(--fontA-fontSizeBase);
+    color: var(--textDarkPrimary);
+  }
+
+  & .toggle-label {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing5);
+
+    &.toggle-label-left {
+      flex-direction: row-reverse;
+    }
+  }
+
+  & .toggle-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--baseFill5);
+  }
+}

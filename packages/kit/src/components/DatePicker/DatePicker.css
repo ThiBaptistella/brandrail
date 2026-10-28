@@ -1,0 +1,104 @@
+.datepicker {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+
+  & .datepicker-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: var(--strokeSm) solid var(--baseBorder);
+    background: var(--baseSurface1);
+    padding: 0 var(--spacing7);
+    border-radius: var(--defaultRadius-rad2);
+    cursor: pointer;
+    gap: var(--spacing5);
+
+    &:hover {
+      background: var(--baseFill1);
+    }
+
+    &.disabled {
+      background: var(--baseFill1);
+
+      & .datepicker-input {
+        color: var(--baseDisabled);
+        opacity: 0.3;
+      }
+
+      & img {
+        opacity: 0.3;
+      }
+    }
+
+    &.isOpen {
+      border: var(--strokeSm) solid var(--stateBrandActive);
+    }
+
+    & .datepicker-input {
+      border: none;
+      outline: none;
+      flex-grow: 1;
+      background: transparent;
+      color: var(--textDarkSecondary);
+      font-family: var(--fontA-fontFamily);
+      font-weight: 500;
+    }
+
+    & .datepicker-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.datepicker-input-small {
+      width: 328px;
+      height: 36px;
+
+      & .datepicker-input {
+        font-size: var(--fontA-fontSizeSm);
+        line-height: var(--fontA-lineHeightSm);
+      }
+
+      & .icon {
+        width: 20px;
+        height: 20px;
+        color: var(--baseFill5);
+      }
+    }
+
+    &.datepicker-input-medium {
+      width: 416px;
+      height: 44px;
+
+      & .datepicker-input {
+        font-size: var(--fontA-fontSizeBase);
+        line-height: var(--fontA-lineHeightBase);
+      }
+
+      & .icon {
+        width: 24px;
+        height: 24px;
+        color: var(--baseFill5);
+      }
+    }
+
+    &.datepicker-input-large {
+      width: 528px;
+      height: 56px;
+
+      & .datepicker-input {
+        font-size: var(--fontA-fontSizeLg);
+        line-height: var(--fontA-lineHeightLg);
+      }
+
+      & .icon {
+        width: 28px;
+        height: 28px;
+        color: var(--baseFill5);
+      }
+    }
+  }
+}

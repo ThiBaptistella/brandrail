@@ -1,0 +1,134 @@
+.caption-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing2);
+  font-family: var(--fontA-fontFamily);
+
+  & .caption-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing5);
+
+    & .icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &.caption-info {
+        color: var(--textDarkSecondary);
+      }
+
+      &.caption-success {
+        color: var(--stateSuccessActive);
+      }
+
+      &.caption-error {
+        color: var(--stateDangerActive);
+      }
+
+      &.caption-warning {
+        color: var(--stateWarningActive);
+      }
+
+      &.small {
+        width: 20px;
+        height: 20px;
+      }
+
+      &.medium {
+        width: 24px;
+        height: 24px;
+      }
+
+      &.large {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+
+  & .caption {
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing2);
+
+    &.small {
+      font-size: var(--fontA-fontSizeXs);
+    }
+
+    &.medium {
+      font-size: var(--fontA-fontSizeSm);
+    }
+
+    &.large {
+      font-size: var(--fontA-fontSizeBase);
+    }
+
+    &.caption-info {
+      color: var(--textDarkSecondary);
+    }
+
+    &.caption-success {
+      color: var(--stateSuccessActive);
+    }
+
+    &.caption-error {
+      color: var(--stateDangerActive);
+    }
+
+    &.caption-warning {
+      color: var(--stateWarningActive);
+    }
+  }
+
+  & .strength-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing5);
+
+    & .strength-bar {
+      display: flex;
+      gap: var(--spacing1);
+    }
+
+    & .strength-segment {
+      background: var(--baseBorder);
+      border-radius: var(--defaultRadius-rad2);
+      transition: background 0.3s ease-in-out;
+
+      &.small {
+        height: 4px;
+        width: 27px;
+      }
+
+      &.medium {
+        height: 6px;
+        width: 26px;
+      }
+
+      &.large {
+        height: 8px;
+        width: 25px;
+      }
+
+      &.filled {
+        background: var(--stateBrandActive);
+      }
+
+      /* Strength Bar Colors */
+      &.strength-success.filled {
+        background: var(--stateSuccessActive);
+      }
+
+      &.strength-error.filled {
+        background: var(--stateDangerActive);
+      }
+
+      &.strength-warning.filled {
+        background: var(--stateWarningActive);
+      }
+    }
+  }
+}

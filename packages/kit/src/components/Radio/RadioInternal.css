@@ -1,0 +1,96 @@
+.radio {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  justify-content: center;
+
+  &.disabled {
+    cursor: not-allowed;
+
+    & .radio-input {
+      background-color: var(--baseDisabled);
+      border: var(--strokeSm) solid var(--baseDisabled);
+    }
+
+    & .radio-icon {
+      background-color: var(--baseDisabled);
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
+
+  & .radio-input {
+    appearance: none;
+    background-color: var(--baseFill1);
+    border: var(--strokeSm) solid var(--baseBorder);
+    border-radius: 50%;
+    transition: background-color 0.2s ease-in-out, border 0.2s ease-in-out;
+    position: relative;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      border: var(--strokeSm) solid var(--stateBrandSelected);
+    }
+  }
+
+  & .radio-input:checked {
+    background-color: var(--stateBrandActive);
+    border: var(--strokeSm) solid var(--stateBrandActive);
+
+    &:hover {
+      border: var(--strokeSm) solid var(--stateBrandSelected);
+      background: var(--stateBrandHover);
+    }
+  }
+
+  & .radio-input:disabled {
+    background-color: var(--baseDisabled);
+    border-color: var(--baseDisabled);
+    cursor: not-allowed;
+  }
+
+  & .radio-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    background: var(--baseFill1);
+    border-radius: 50%;
+
+    /* Sizes */
+    &.small {
+      width: 12px;
+      height: 12px;
+    }
+
+    &.medium {
+      width: 14px;
+      height: 14px;
+    }
+
+    &.large {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  /* Sizes */
+  &.radio-small .radio-input {
+    width: 22px;
+    height: 22px;
+  }
+
+  &.radio-medium .radio-input {
+    width: 24px;
+    height: 24px;
+  }
+
+  &.radio-large .radio-input {
+    width: 32px;
+    height: 32px;
+  }
+}
