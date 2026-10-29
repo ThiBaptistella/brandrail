@@ -68,6 +68,6 @@ export async function publishBrandKitAction(
  */
 export async function importFromFigmaAction(input: { token: string; url: string }): Promise<FigmaFetchResult> {
   const { org } = await requireOrg();
-  if (org.role !== "owner" && org.role !== "admin") return { ok: false, error: "Only owners and admins can import into the Brand Kit." };
+  if (org.role !== "owner" && org.role !== "admin") return { ok: false, error: "Only owners and admins can import into the Brand Kit.", log: [] };
   return fetchFigmaTokens(input.token, input.url);
 }

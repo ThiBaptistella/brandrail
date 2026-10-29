@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, relative, resolve } from "node:path";
+import { strFromU8, unzipSync } from "fflate";
 import {
   check,
   ENGINE_VERSION,
@@ -10,7 +11,9 @@ import {
   generateInstructions,
   generateTokensCss,
   kitBridgeCss,
-  importTokens,
+  importTokenFiles,
+  auditBrandKit,
+  type TokenFile,
   mcpClientConfigs,
   mergeTokens,
   RULE_FILES,
@@ -31,7 +34,7 @@ Usage
   brandrail check [paths...]   Scan files and print violations
   brandrail init               Create brandrail.config.json and AI rule files
   brandrail scan <url>         Check a running page (localhost, staging, behind a login) in a real browser
-  brandrail import <file>      Load tokens (DTCG, Tokens Studio, Figma variables JSON) into the config
+  brandrail import <files…>   Load tokens into the config: DTCG, Tokens Studio, Figma variables JSON, or Figma's Export modes ZIP
   brandrail rules              List the rules
 
 Options for check
@@ -313,11 +316,33 @@ async function cmdScan(cwd: string, positional: string[], flags: Flags): Promise
   return 0;
 }
 
+/** JSON files, folders of them, or a ZIP (Figma's "Export modes" gives one JSON per mode). */
+function readTokenInputs(cwd: string, inputs: string[]): TokenFile[] {
+  const files: TokenFile[] = [];
+  const add = (name: string, text: string) => files.push({ name, data: JSON.parse(text) as unknown });
+  const walk = (abs: string, rel: string) => {
+    if (statSync(abs).isDirectory()) {
+      for (const e of readdirSync(abs)) if (!e.startsWith(".")) walk(join(abs, e), rel ? `${rel}/${e}` : e);
+    } else if (/\.zip$/i.test(abs)) {
+      const entries = unzipSync(new Uint8Array(readFileSync(abs)), { filter: (e) => /\.json$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name) });
+      for (const [name, bytes] of Object.entries(entries)) add(name, strFromU8(bytes));
+    } else if (/\.json$/i.test(abs)) {
+      add(rel || basename(abs), readFileSync(abs, "utf8"));
+    }
+  };
+  for (const input of inputs) {
+    const abs = resolve(cwd, input);
+    walk(abs, statSync(abs).isDirectory() ? "" : basename(abs));
+  }
+  return files;
+}
+
 function cmdImport(cwd: string, positional: string[], flags: Flags): number {
-  const file = positional[0];
-  if (!file) throw new Error("Usage: brandrail import <tokens.json> [--replace] [--primitives]");
-  const raw = JSON.parse(readFileSync(resolve(cwd, file), "utf8")) as unknown;
-  const res = importTokens(raw, { includePrimitives: !!flags.primitives });
+  if (!positional.length) throw new Error("Usage: brandrail import <tokens.json | folder | export.zip> [more files…] [--replace] [--primitives]");
+  const files = readTokenInputs(cwd, positional);
+  if (!files.length) throw new Error("No .json token files found.");
+  const res = importTokenFiles(files, { includePrimitives: !!flags.primitives });
+  const file = files.length === 1 ? positional[0] : `${files.length} files`;
   const path = (typeof flags.config === "string" ? resolve(cwd, flags.config) : findConfig(cwd)) ?? join(cwd, CONFIG_FILE);
   const config: BrandrailConfig = existsSync(path) ? readConfig(path) : { ...starterConfig, tokens: {} };
   const next = flags.replace ? res.tokens : mergeTokens(config.tokens, res.tokens);
@@ -325,6 +350,7 @@ function cmdImport(cwd: string, positional: string[], flags: Flags): number {
   writeFileSync(path, `${JSON.stringify({ ...config, tokens: next }, null, 2)}\n`);
   log(`✔ ${res.count} tokens from ${file} (${res.format})${res.primitives ? `, ${res.primitives} palette primitives left out (--primitives to keep)` : ""}`);
   for (const n of res.notes) log(`  · ${n}`);
+  for (const i of auditBrandKit(next)) log(`  ${i.severity === "error" ? "✖" : "!"} ${i.message}`);
   log(`✔ ${relative(cwd, path) || CONFIG_FILE}: ${d.changed.length} changed, ${d.added.length} added, ${d.removed.length} removed`);
   log("\nNext: npx brandrail init (to refresh AI rule files), then npx brandrail check");
   return 0;

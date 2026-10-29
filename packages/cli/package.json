@@ -44,6 +44,7 @@
     "@brandrail/engine": "workspace:*",
     "@types/node": "^22",
     "esbuild": "^0.28.2",
+    "fflate": "0.8.2",
     "playwright-core": "1.63.0",
     "typescript": "5.9.3"
   }

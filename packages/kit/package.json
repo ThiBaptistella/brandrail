@@ -1,6 +1,6 @@
 {
   "name": "@brandrail/kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Midrocks UI kit by Thiago Baptistella: React components that follow your Brandrail Brand Kit.",
   "license": "UNLICENSED",
   "type": "module",

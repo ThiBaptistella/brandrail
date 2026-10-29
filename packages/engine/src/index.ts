@@ -12,6 +12,7 @@ export type { TokenColor } from "./config.ts";
 export { mcpClientConfigs, RULE_FILES, type McpClientConfig } from "./mcp-config.ts";
 export {
   importTokens,
+  importTokenFiles,
   fromFigmaVariables,
   fromFigmaStyles,
   fromModeObject,
@@ -28,6 +29,7 @@ export {
   type ImportResult,
   type ImportFormat,
   type ImportOptions,
+  type TokenFile,
   type TokenDiff,
   type FigmaVariablesMeta,
   type FigmaVariable,

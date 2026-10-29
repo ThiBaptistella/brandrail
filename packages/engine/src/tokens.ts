@@ -11,6 +11,9 @@
  *  - Plain mode-keyed objects such as { light: {...}, dark: {...}, compact: {...} }
  *    (what most "export Figma variables" scripts produce)
  *  - Figma colour and text styles (fallback for plans without the Variables API)
+ *  - Figma's own variables export (Variables → Export modes): one DTCG file per mode, colours as
+ *    DTCG 2025.10 objects, `com.figma.*` extensions. Several files (or a ZIP) are combined with
+ *    `importTokenFiles`, Light and Dark becoming one token with a dark value.
  */
 import { parseColor, toHex } from "./color.ts";
 import type { DtcgDoc } from "./types.ts";
@@ -27,7 +30,7 @@ export interface FlatToken {
   description?: string;
 }
 
-export type ImportFormat = "dtcg" | "tokens-studio" | "figma-variables" | "figma-styles" | "mode-object";
+export type ImportFormat = "dtcg" | "tokens-studio" | "figma-variables" | "figma-export" | "figma-styles" | "mode-object";
 
 export interface ImportResult {
   format: ImportFormat;
@@ -88,6 +91,18 @@ export function fontWeight(v: string | number): string {
 }
 
 function colorValue(v: unknown): string | null {
+  // DTCG 2025.10: { colorSpace: "srgb", components: [r, g, b], alpha?, hex? } (Figma's export uses this)
+  if (v && typeof v === "object" && ("components" in v || "hex" in v)) {
+    const c = v as { colorSpace?: string; components?: Array<number | string>; alpha?: number; hex?: string };
+    const alpha = typeof c.alpha === "number" ? c.alpha : 1;
+    const withAlpha = (hex: string) => (alpha < 1 ? `${hex.slice(0, 7)}${Math.round(alpha * 255).toString(16).padStart(2, "0")}` : hex.slice(0, 7));
+    if (typeof c.hex === "string" && /^#[0-9a-f]{6}/i.test(c.hex)) return withAlpha(c.hex.toLowerCase());
+    const comps = c.components?.map((x) => (typeof x === "number" ? x : 0));
+    if (comps?.length === 3 && (!c.colorSpace || /srgb|display-p3/i.test(c.colorSpace))) {
+      return withAlpha(toHex({ r: comps[0]! * 255, g: comps[1]! * 255, b: comps[2]! * 255, a: 1 }));
+    }
+    return null;
+  }
   if (v && typeof v === "object" && "r" in v) {
     const c = v as { r: number; g: number; b: number; a?: number };
     const hex = toHex({ r: c.r * 255, g: c.g * 255, b: c.b * 255, a: 1 });
@@ -106,7 +121,15 @@ function colorValue(v: unknown): string | null {
   return rgb.a < 1 ? `${hex}${Math.round(rgb.a * 255).toString(16).padStart(2, "0")}` : hex;
 }
 
-const dim = (v: unknown) => (typeof v === "number" ? `${Math.round(v * 100) / 100}px` : String(v).trim());
+const dim = (v: unknown): string => {
+  // DTCG 2025.10: { value: 16, unit: "px" | "rem" }
+  if (v && typeof v === "object" && "value" in v) {
+    const d = v as { value: number | string; unit?: string };
+    const n = typeof d.value === "number" ? d.value : parseFloat(d.value);
+    return d.unit === "rem" ? `${Math.round(n * 16 * 100) / 100}px` : `${Math.round(n * 100) / 100}px`;
+  }
+  return typeof v === "number" ? `${Math.round(v * 100) / 100}px` : String(v).trim();
+};
 
 /**
  * Decides where a token lives in the Brand Kit from its name, its Figma scopes and its value.
@@ -235,9 +258,9 @@ export function flattenTokens(doc: unknown): FlatToken[] {
       if (!v) continue;
       const d = r.dark !== undefined ? colorValue(r.dark) : null;
       out.push({ path: r.path, type: "color", value: v, ...(d ? { dark: d } : {}), ...(r.description ? { description: r.description } : {}) });
-    } else if (typeof r.value === "string" || typeof r.value === "number") {
+    } else if (typeof r.value === "string" || typeof r.value === "number" || (r.value && typeof r.value === "object" && "unit" in (r.value as object))) {
       const type: TokenType =
-        t === "fontfamily" || t === "fontfamilies" ? "fontFamily" : t === "fontweight" || t === "fontweights" ? "fontWeight" : TYPE_KIND[t] === "number" ? "dimension" : t === "number" ? "number" : /^font\.family\./.test(r.path) ? "fontFamily" : typeof r.value === "number" ? "number" : /px$|rem$/.test(String(r.value)) ? "dimension" : "string";
+        typeof r.value === "object" ? "dimension" : t === "fontfamily" || t === "fontfamilies" ? "fontFamily" : t === "fontweight" || t === "fontweights" ? "fontWeight" : TYPE_KIND[t] === "number" ? "dimension" : t === "number" ? "number" : /^font\.family\./.test(r.path) ? "fontFamily" : typeof r.value === "number" ? "number" : /px$|rem$/.test(String(r.value)) ? "dimension" : "string";
       out.push({ path: r.path, type, value: type === "dimension" ? dim(r.value) : String(r.value), ...(r.description ? { description: r.description } : {}) });
     }
   }
@@ -581,16 +604,158 @@ export function fromModeObject(obj: Plain, opts: ImportOptions = {}): ImportResu
   return finish("mode-object", out, notes, opts);
 }
 
+/* ───────────────────────── several files: Figma "Export modes", one file per mode ───────────────────────── */
+
+export interface TokenFile {
+  /** File name, with folders when it came from a ZIP: "Semantic/Dark.tokens.json". */
+  name: string;
+  data: unknown;
+}
+
+type FileLeaf = { path: string; type?: string; value: unknown; description?: string; scopes?: string[]; aliasTarget?: string; hidden?: boolean };
+
+const figmaExt = (node: Plain, key: string): unknown => {
+  const ext = node.$extensions as Plain | undefined;
+  if (!ext) return undefined;
+  if (`com.figma.${key}` in ext) return ext[`com.figma.${key}`];
+  const nested = ext["com.figma"] as Plain | undefined;
+  return nested?.[key];
+};
+
+function fileLeaves(node: unknown, prefix: string, out: FileLeaf[], inherited?: string) {
+  if (!node || typeof node !== "object" || Array.isArray(node)) return;
+  const o = node as Plain;
+  const groupType = (o.$type as string | undefined) ?? inherited;
+  if ("$value" in o) {
+    const alias = figmaExt(o, "aliasData") as { targetVariableName?: string } | undefined;
+    const scopes = figmaExt(o, "scopes");
+    out.push({
+      path: prefix,
+      type: (o.$type as string | undefined) ?? groupType,
+      value: o.$value,
+      description: o.$description as string | undefined,
+      scopes: Array.isArray(scopes) ? (scopes as string[]) : undefined,
+      aliasTarget: alias?.targetVariableName?.replace(/\//g, "."),
+      hidden: figmaExt(o, "hiddenFromPublishing") === true || undefined,
+    });
+    return;
+  }
+  for (const [k, v] of Object.entries(o)) {
+    if (k.startsWith("$")) continue;
+    // Figma writes a group's own value under "$root"-style keys; keep the group name.
+    fileLeaves(v, prefix ? `${prefix}.${k}` : k, out, groupType);
+  }
+}
+
+const hasFigmaExt = (node: unknown, depth = 0): boolean => {
+  if (!node || typeof node !== "object" || depth > 12) return false;
+  const ext = (node as Plain).$extensions as Plain | undefined;
+  if (ext && Object.keys(ext).some((k) => k.startsWith("com.figma"))) return true;
+  return Object.values(node as Plain).some((v) => hasFigmaExt(v, depth + 1));
+};
+
+function modeOf(file: TokenFile): { collection: string; mode: string } {
+  const root = (file.data ?? {}) as Plain;
+  const parts = file.name.replace(/\\/g, "/").split("/").filter(Boolean);
+  const base = (parts.pop() ?? "tokens").replace(/(\.tokens)?\.json$/i, "");
+  const named = figmaExt(root, "modeName");
+  // "Semantic.Dark" / "Semantic - Dark" style names carry both parts.
+  const split = base.match(/^(.+?)[\s._-]+(light|dark|night|day|default|mode[\s_-]*\d+)$/i);
+  return {
+    collection: parts.join("/") || (split ? split[1]! : ""),
+    mode: typeof named === "string" ? named : split ? split[2]! : base,
+  };
+}
+
+/**
+ * Combines several token files: modes of one collection (Light.tokens.json + Dark.tokens.json)
+ * become one token with a dark value; different collections (Primitives + Semantic) are merged,
+ * so aliases between them resolve.
+ */
+export function importTokenFiles(files: TokenFile[], opts: ImportOptions = {}): ImportResult {
+  const parsed = files.filter((f) => f.data && typeof f.data === "object");
+  if (!parsed.length) throw new Error("No JSON token files found.");
+  const figma = parsed.some((f) => hasFigmaExt(f.data));
+  if (parsed.length === 1 && !figma) return importTokens(parsed[0]!.data, opts);
+
+  const notes: string[] = [];
+  const withMode = parsed.map((f) => ({ ...f, ...modeOf(f) }));
+  const byCollection = new Map<string, typeof withMode>();
+  for (const f of withMode) byCollection.set(f.collection, [...(byCollection.get(f.collection) ?? []), f]);
+
+  const light = new Map<string, Raw & { leaf: FileLeaf }>();
+  const darkOverrides = new Map<string, Raw & { leaf: FileLeaf }>();
+  for (const [collection, list] of byCollection) {
+    const dark = list.find((f) => DARK.test(f.mode));
+    const def = list.find((f) => LIGHT.test(f.mode) && !DARK.test(f.mode)) ?? list.find((f) => !DARK.test(f.mode)) ?? list[0]!;
+    if (list.length > 1) {
+      const label = collection ? `“${collection}”` : "The files";
+      notes.push(`${label}: modes ${list.map((f) => f.mode).join(", ")}; used “${def.mode}”${dark && dark !== def ? ` (and “${dark.mode}” as dark)` : ""}.`);
+    }
+    const read = (f: TokenFile, into: Map<string, Raw & { leaf: FileLeaf }>) => {
+      const leaves: FileLeaf[] = [];
+      fileLeaves(f.data, "", leaves);
+      for (const l of leaves) into.set(l.path, { path: l.path, type: l.type, value: l.value, description: l.description, leaf: l });
+    };
+    read(def, light);
+    if (dark && dark !== def) read(dark, darkOverrides);
+  }
+
+  // Resolve aliases per mode: dark uses its own values where it has them, light ones otherwise.
+  const lightRaws = resolveRefs([...light.values()]);
+  const darkRaws = resolveRefs([...light.values()].map((r) => darkOverrides.get(r.path) ?? r));
+  const darkByPath = new Map(darkRaws.map((r) => [r.path, r.value]));
+
+  const referenced = new Set<string>();
+  for (const r of [...light.values(), ...darkOverrides.values()]) {
+    if (r.leaf.aliasTarget) referenced.add(r.leaf.aliasTarget);
+    const m = typeof r.value === "string" ? r.value.trim().match(REF) : null;
+    if (m) referenced.add(m[1]!);
+  }
+
+  const out: Array<FlatToken & { referenced?: boolean }> = [];
+  let hidden = 0;
+  for (const r of lightRaws) {
+    const leaf = light.get(r.path)!.leaf;
+    if (leaf.hidden) {
+      hidden++;
+      continue;
+    }
+    const t = (r.type ?? "").toLowerCase();
+    const kind = t === "color" ? "color" : t === "boolean" ? "boolean" : t === "string" || t === "fontfamily" || t === "fontweight" ? "string" : typeof r.value === "string" && !/^-?[\d.]+(px|rem)?$/.test(r.value) && !colorValue(r.value) ? "string" : colorValue(r.value) && t !== "number" && t !== "dimension" ? "color" : "number";
+    let tok: { path: string; type: TokenType; value: string } | null;
+    if (figma) {
+      // Figma names (color/action/primary) go through the same mapping as the Variables API.
+      const value = kind === "number" && r.value && typeof r.value === "object" ? parseFloat(dim(r.value)) : r.value;
+      tok = classify(r.path.replace(/\./g, "/"), kind, value, { scopes: leaf.scopes?.filter((x) => x !== "ALL_SCOPES") });
+    } else {
+      const flat = flattenTokens({ x: { $type: r.type, $value: r.value } })[0];
+      tok = flat ? { path: flat.type === "color" && !r.path.startsWith("color.") ? `color.${r.path}` : r.path, type: flat.type, value: flat.value } : null;
+    }
+    if (!tok) continue;
+    let darkValue: string | undefined;
+    if (tok.type === "color" && darkOverrides.size) {
+      const d = colorValue(darkByPath.get(r.path));
+      if (d && d !== tok.value) darkValue = d;
+    }
+    out.push({ ...tok, ...(darkValue ? { dark: darkValue } : {}), ...(r.description ? { description: r.description } : {}), referenced: referenced.has(r.path) });
+  }
+  if (hidden) notes.push(`${hidden} variable${hidden === 1 ? "" : "s"} hidden from publishing were skipped.`);
+  return finish(figma ? "figma-export" : "dtcg", out, notes, opts);
+}
+
 /* ───────────────────────── entry point ───────────────────────── */
 
 /** Detects the format of a parsed JSON document and converts it to DTCG. */
 export function importTokens(input: unknown, opts: ImportOptions = {}): ImportResult {
   if (!input || typeof input !== "object") throw new Error("Expected a JSON object.");
   const o = input as Plain;
+  if (Array.isArray(o.$files)) return importTokenFiles(o.$files as TokenFile[], opts);
   const meta = (o.meta ?? o) as Partial<FigmaVariablesMeta>;
   if (meta.variables && meta.variableCollections) return fromFigmaVariables(meta as FigmaVariablesMeta, opts);
   if (Array.isArray(o.styles) && (o.styles as FigmaStyleNode[]).every((s) => s && "styleType" in s)) return fromFigmaStyles(o.styles as FigmaStyleNode[], opts);
 
+  if (hasDollarValue(o) && hasFigmaExt(o)) return importTokenFiles([{ name: "tokens.json", data: o }], opts);
   if (hasDollarValue(o) || hasStudioValue(o)) {
     const studio = !hasDollarValue(o);
     const flat = flattenTokens(o);

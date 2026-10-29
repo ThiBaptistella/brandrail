@@ -4,14 +4,16 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { ArrowRight, FileJson, Link2, Minus, Plus, X } from "lucide-react";
 import { diffTokens, importTokens, mergeTokens, type FlatToken, type ImportResult } from "@brandrail/engine";
 import { Button, Flash, FormControl, Label, TextInput, Textarea, cn } from "@brandrail/ui";
+import { unzipSync, strFromU8 } from "fflate";
 import { importFromFigmaAction } from "@/app/actions/brand-kit";
 import { fromDtcg, toDtcg, type BrandKitState } from "@/lib/brand-kit";
 
-type Source = { origin: "figma" | "file"; label: string; data: unknown; notes: string[] };
+type Source = { origin: "figma" | "file"; label: string; data: unknown; notes: string[]; log?: string[] };
 export type AppliedImport = { state: BrandKitState; source: "figma" | "import"; summary: string };
 
 const FORMAT_LABEL: Record<ImportResult["format"], string> = {
   "figma-variables": "Figma variables",
+  "figma-export": "Figma variables export",
   "figma-styles": "Figma styles",
   dtcg: "DTCG tokens",
   "tokens-studio": "Tokens Studio",
@@ -19,6 +21,34 @@ const FORMAT_LABEL: Record<ImportResult["format"], string> = {
 };
 
 const URL_KEY = "brandrail.figmaUrl";
+
+/**
+ * Reads dropped or chosen files: JSON files, or a ZIP (Figma's "Export modes" on a collection gives one
+ * JSON per mode). Several files are passed on together so Light + Dark become one token with a dark value.
+ */
+async function readTokenFiles(list: FileList | File[]): Promise<{ label: string; data: unknown }> {
+  const files: Array<{ name: string; data: unknown }> = [];
+  const bad: string[] = [];
+  const addJson = (name: string, text: string) => {
+    try {
+      files.push({ name, data: JSON.parse(text) as unknown });
+    } catch {
+      bad.push(name);
+    }
+  };
+  for (const f of Array.from(list)) {
+    if (/\.zip$/i.test(f.name) || f.type === "application/zip") {
+      const entries = unzipSync(new Uint8Array(await f.arrayBuffer()), { filter: (e) => /\.json$/i.test(e.name) && !/(^|\/)(__MACOSX|\.)/.test(e.name) });
+      for (const [name, bytes] of Object.entries(entries)) addJson(name, strFromU8(bytes));
+    } else {
+      addJson(f.name, await f.text());
+    }
+  }
+  if (!files.length) throw new Error(bad.length ? `${bad.join(", ")} ${bad.length === 1 ? "isn't" : "aren't"} valid JSON.` : "No JSON files found.");
+  const first = Array.from(list)[0]!.name;
+  const label = files.length === 1 ? files[0]!.name : `${first}${list.length === 1 ? "" : ` +${list.length - 1}`} · ${files.length} files`;
+  return { label, data: files.length === 1 ? files[0]!.data : { $files: files } };
+}
 const read = (k: string) => {
   try {
     return localStorage.getItem(k) ?? "";
@@ -44,6 +74,7 @@ export function ImportDialog({
   const [url, setUrl] = useState(() => read(URL_KEY));
   const [pasted, setPasted] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [callLog, setCallLog] = useState<string[]>([]);
   const [source, setSource] = useState<Source | null>(null);
   const [pending, start] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -51,13 +82,26 @@ export function ImportDialog({
   const readFigma = () =>
     start(async () => {
       setError(null);
+      setCallLog([]);
       const r = await importFromFigmaAction({ token, url });
+      setCallLog(r.log ?? []);
       if (!r.ok) return setError(r.error);
       try {
         localStorage.setItem(URL_KEY, url);
       } catch {}
-      setSource({ origin: "figma", label: r.fileName, data: r.data, notes: r.notes });
+      setSource({ origin: "figma", label: r.fileName, data: r.data, notes: r.notes, log: r.log });
     });
+
+  const readFiles = async (list: FileList | File[]) => {
+    setError(null);
+    try {
+      const { label, data } = await readTokenFiles(list);
+      importTokens(data); // validates
+      setSource({ origin: "file", label, data, notes: [] });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
   const readJson = (text: string, label: string) => {
     setError(null);
@@ -104,6 +148,7 @@ export function ImportDialog({
               ))}
             </div>
             {error && <Flash tone="danger">{error}</Flash>}
+            {error && callLog.length > 0 && <CallLog log={callLog} open />}
 
             {tab === "figma" ? (
               <form
@@ -125,7 +170,9 @@ export function ImportDialog({
                 </FormControl>
                 <div className="rounded-md border border-line bg-canvas-subtle p-3 text-xs leading-5 text-fg-muted">
                   Variables come with their modes: a mode named <strong className="text-fg">Dark</strong> becomes each colour&apos;s dark value, and aliases are resolved. Figma only
-                  serves variables over the API on Enterprise plans; on other plans colour and text styles are read instead, or export your variables as JSON and use the JSON tab.
+                  serves variables over the API on Enterprise plans; on other plans colour and text styles are read instead. For variables on any plan, use{" "}
+                  <strong className="text-fg">Export modes</strong> in Figma&apos;s Variables panel and drop the ZIP on the JSON file tab. Figma also limits API reads per seat (View and Collab
+                  seats get only a few a month), so the JSON route is the reliable one.
                 </div>
                 <div>
                   <Button type="submit" variant="primary" disabled={pending || !url || !token} aria-busy={pending}>
@@ -140,26 +187,28 @@ export function ImportDialog({
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={async (e) => {
                     e.preventDefault();
-                    const f = e.dataTransfer.files[0];
-                    if (f) readJson(await f.text(), f.name);
+                    if (e.dataTransfer.files.length) await readFiles(e.dataTransfer.files);
                   }}
                 >
                   <FileJson size={22} className="text-fg-subtle" />
-                  <p className="text-sm text-fg">Drop a tokens file here</p>
-                  <p className="max-w-sm text-xs text-fg-muted">W3C DTCG, Tokens Studio, a Figma variables export, or Figma&apos;s REST response. Read in your browser; nothing is uploaded until you publish.</p>
+                  <p className="text-sm text-fg">Drop token files or a ZIP here</p>
+                  <p className="max-w-sm text-xs text-fg-muted">
+                    From Figma: open Variables, right-click a collection → <strong className="text-fg">Export modes</strong>, and drop the ZIP (Light and Dark become one token).
+                    Also W3C DTCG, Tokens Studio or Figma&apos;s REST response. Read in your browser; nothing is uploaded until you publish.
+                  </p>
                   <input
                     ref={fileRef}
                     type="file"
-                    accept=".json,application/json"
+                    accept=".json,application/json,.zip,application/zip"
+                    multiple
                     className="sr-only"
                     onChange={async (e) => {
-                      const f = e.target.files?.[0];
-                      if (f) readJson(await f.text(), f.name);
+                      if (e.target.files?.length) await readFiles(e.target.files);
                       e.target.value = "";
                     }}
                   />
                   <Button size="sm" onClick={() => fileRef.current?.click()} className="mt-1">
-                    Choose file
+                    Choose files
                   </Button>
                 </div>
                 <FormControl label="…or paste JSON" htmlFor="fg-paste">
@@ -219,6 +268,7 @@ function Review({
             {imported.primitives > 0 && !primitives && <> · {imported.primitives} palette primitives left out</>}
           </span>
         </div>
+        {source.log && source.log.length > 0 && <CallLog log={source.log} />}
         {notes.length > 0 && (
           <ul className="flex flex-col gap-1 rounded-md border border-line bg-canvas-subtle p-3 text-xs text-fg-muted">
             {notes.map((n) => (
@@ -341,5 +391,19 @@ function Value({ t, muted }: { t: FlatToken; muted?: boolean }) {
       )}
       <span className="max-w-[140px] truncate">{t.value}</span>
     </span>
+  );
+}
+
+/** What each Figma API call returned: makes a failed or partial import easy to diagnose. */
+function CallLog({ log, open = false }: { log: string[]; open?: boolean }) {
+  return (
+    <details open={open} className="rounded-md border border-line text-xs">
+      <summary className="cursor-pointer px-3 py-2 text-fg-muted select-none hover:text-fg">Figma API calls ({log.length})</summary>
+      <ol className="flex flex-col gap-1 border-t border-line px-3 py-2 font-mono text-[11px] text-fg-muted">
+        {log.map((l, i) => (
+          <li key={i}>{l}</li>
+        ))}
+      </ol>
+    </details>
   );
 }
