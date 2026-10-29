@@ -3,6 +3,8 @@ import { resolveConfig } from "./config.ts";
 import { RULES } from "./rules.ts";
 import type { BrandrailConfig } from "./types.ts";
 
+const KIT_PACKAGE = "@brandrail/kit";
+
 export const RULES_START = "<!-- brandrail:start -->";
 export const RULES_END = "<!-- brandrail:end -->";
 
@@ -19,9 +21,15 @@ export function generateInstructions(config: BrandrailConfig, opts: { org?: stri
     `All UI in this repo must follow the Brand Kit${r.tokenVersion ? ` (v${r.tokenVersion})` : ""}. These rules are checked on every pull request by Brandrail.`,
   );
   lines.push("");
-  if (opts.tokensCss) {
+  const usesKit = r.components.some((c) => c.importPath === KIT_PACKAGE);
+  if (opts.tokensCss || usesKit) {
     lines.push("## Setup");
-    lines.push(`- \`${opts.tokensCss}\` defines every CSS variable below (light and dark). Import it once at the app entry, before other styles. Don't edit it: it's generated from the Brand Kit.`);
+    if (opts.tokensCss) {
+      lines.push(`- \`${opts.tokensCss}\` defines every CSS variable below (light and dark). Import it once at the app entry, before other styles. Don't edit it: it's generated from the Brand Kit.`);
+    }
+    if (usesKit) {
+      lines.push(`- Import \`${KIT_PACKAGE}/styles.css\` once at the app entry. Pass \`theme="brandrail"\` to kit components, and \`colorMode={ColorMode.DARK}\` (from \`${KIT_PACKAGE}\`) for dark mode. The Brand Kit styles them through the CSS variables; don't override their colours, spacing or fonts with your own CSS.`);
+    }
     lines.push("");
   }
   if (r.components.length) {

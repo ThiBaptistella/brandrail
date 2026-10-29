@@ -1,21 +1,23 @@
 # @brandrail/kit
 
-React component library used by Brandrail. Private package: install it with an npm token that has access to the `@brandrail` org.
+React component library used by Brandrail. It's a private package on GitHub Packages, published as `@thibaptistella/kit` and installed under the name `@brandrail/kit`.
 
 ## Install
 
-Add an `.npmrc` next to your `package.json` (keep the token in an environment variable, never in the file):
+1. Create a GitHub **classic** personal access token with the `read:packages` scope (GitHub → Settings → Developer settings → Tokens (classic)). Your GitHub account needs access to the `ThiBaptistella/brandrail` repo.
+2. Add an `.npmrc` next to your `package.json`. Keep the token in an environment variable, never in the file:
 
-```
-@brandrail:registry=https://registry.npmjs.org/
-//registry.npmjs.org/:_authToken=${NPM_TOKEN}
-```
+   ```
+   @thibaptistella:registry=https://npm.pkg.github.com
+   //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+   ```
 
-Then:
+3. Install it under its usual name, so imports stay `@brandrail/kit`:
 
-```bash
-npm i @brandrail/kit
-```
+   ```bash
+   export GITHUB_TOKEN=ghp_…   # your token
+   npm i @brandrail/kit@npm:@thibaptistella/kit
+   ```
 
 Peer dependencies: `react` and `react-dom` 19.
 
@@ -39,9 +41,13 @@ export default function App() {
 
 ## Publishing (maintainers)
 
+Needs a GitHub classic token with `write:packages`:
+
 ```bash
 cd packages/kit
-pnpm publish --access restricted
+export NODE_AUTH_TOKEN=ghp_…        # write:packages token
+pnpm run publish:github -- --dry-run # check first
+pnpm run publish:github
 ```
 
-`prepublishOnly` builds `dist/` (ES module, `styles.css`, type declarations). Inside the monorepo the web app uses the TypeScript source directly.
+The script builds `dist/` (ES module, `styles.css`, type declarations), renames the package to `@thibaptistella/kit` (GitHub Packages requires the owner's scope) and publishes it. Bump `version` in `package.json` before each release. Inside the monorepo the web app uses the TypeScript source directly.

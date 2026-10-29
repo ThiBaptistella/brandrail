@@ -1,6 +1,6 @@
 {
   "name": "brandrail",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Keep AI-generated UI on-brand: checks code and live pages against your design system, and wires your Brand Kit into Claude Code, Cursor, Copilot and Codex.",
   "keywords": [
     "design-system",

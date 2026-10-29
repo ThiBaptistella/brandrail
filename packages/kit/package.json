@@ -32,7 +32,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "vite build && tsc -p tsconfig.build.json",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "publish:github": "node scripts/publish-github.mjs"
   },
   "dependencies": {
     "classnames": "^2.5.1",

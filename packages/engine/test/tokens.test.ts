@@ -225,3 +225,12 @@ test("kitBridgeCss maps the Brand Kit onto the kit's variables", async () => {
   assert.match(global, /\.dark \{[^}]*--baseSurface1: #0d1117;/);
   assert.match(kitBridgeCss(tokens, { scope: "#x" }), /^#x \{/m);
 });
+
+test("instructions tell the AI to load the kit stylesheet when kit components are registered", async () => {
+  const { starterConfig } = await import("../src/index.ts");
+  const withKit = generateInstructions({ ...starterConfig, components: [{ name: "Button", importPath: "@brandrail/kit" }] } as never, { tokensCss: "src/brandrail.tokens.css" });
+  assert.match(withKit, /@brandrail\/kit\/styles\.css/);
+  assert.match(withKit, /src\/brandrail\.tokens\.css/);
+  const without = generateInstructions({ ...starterConfig, components: [{ name: "Button", importPath: "@/components/ui/button" }] } as never);
+  assert.doesNotMatch(without, /styles\.css/);
+});
