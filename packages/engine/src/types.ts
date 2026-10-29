@@ -21,6 +21,18 @@ export interface ComponentEntry {
   /** A short usage example (JSX). */
   example?: string;
   status?: "draft" | "beta" | "stable" | "deprecated";
+  /** The props it accepts. When set, AI tools are told to use only these and the Checker flags any other prop. */
+  props?: PropSpec[];
+  /** Also accepts the native attributes of this HTML element (e.g. "input", "div"). */
+  htmlAttributes?: string;
+}
+
+export interface PropSpec {
+  name: string;
+  /** TypeScript type, with enum members spelled out, e.g. "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)". */
+  type?: string;
+  required?: boolean;
+  description?: string;
 }
 
 /** brandrail.config.json */

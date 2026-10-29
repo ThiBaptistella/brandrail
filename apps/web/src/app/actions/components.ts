@@ -109,9 +109,14 @@ export async function importKitAction(importPath: string): Promise<ActionResult>
     aliases: c.aliases ?? [],
     usage_rules: c.usageRules ?? [],
     example: c.example ?? null,
+    props_schema: c.props ? { props: c.props, ...(c.htmlAttributes ? { htmlAttributes: c.htmlAttributes } : {}) } : {},
   }));
   const { data, error } = await supabase.from("components").upsert(rows, { onConflict: "org_id,name", ignoreDuplicates: true }).select("id");
   if (error) return { ok: false, error: error.message };
+  // Components already in the registry keep their text, but get the kit's current props.
+  await Promise.all(
+    rows.map((r) => supabase.from("components").update({ props_schema: r.props_schema }).eq("org_id", org.id).eq("name", r.name).eq("import_path", path)),
+  );
   revalidatePath("/dashboard/components");
   const added = data?.length ?? 0;
   return { ok: true, message: added ? `Added ${added} components from the UI kit.` : "All UI kit components are already in the registry." };

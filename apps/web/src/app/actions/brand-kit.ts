@@ -1,22 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { auditBrandKit, type KitIssue } from "@brandrail/engine";
 import { isSupabaseConfigured } from "@/lib/env";
 import { nextVersion, toDtcg, validateKit, type BrandKitState } from "@/lib/brand-kit";
 import { fetchFigmaTokens, type FigmaFetchResult } from "@/lib/figma";
 import { requireOrg } from "@/lib/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type PublishResult = { ok: true; version: string; demo?: boolean } | { ok: false; error: string };
+export type PublishResult =
+  | { ok: true; version: string; demo?: boolean }
+  | { ok: false; error: string; /** Set when quality checks found errors: publish again with acceptIssues to go ahead. */ issues?: KitIssue[] };
 export type KitSource = "manual" | "figma" | "import";
 
-export async function publishBrandKitAction(state: BrandKitState, opts: { notes?: string; source?: KitSource } = {}): Promise<PublishResult> {
+export async function publishBrandKitAction(
+  state: BrandKitState,
+  opts: { notes?: string; source?: KitSource; acceptIssues?: boolean } = {},
+): Promise<PublishResult> {
   const { user, org } = await requireOrg();
 
   const invalid = validateKit(state);
   if (invalid) return { ok: false, error: invalid };
   if (org.role !== "owner" && org.role !== "admin") {
     return { ok: false, error: "Only owners and admins can publish the Brand Kit." };
+  }
+
+  // Readability problems end up in every app built from the kit: publishing them needs an explicit OK.
+  const errors = auditBrandKit(toDtcg(state)).filter((i) => i.severity === "error");
+  if (errors.length && !opts.acceptIssues) {
+    return { ok: false, error: `${errors.length} readability ${errors.length === 1 ? "problem" : "problems"} found. Fix ${errors.length === 1 ? "it" : "them"}, or publish anyway.`, issues: errors };
   }
 
   if (!isSupabaseConfigured) return { ok: true, version: "1.0.0", demo: true };

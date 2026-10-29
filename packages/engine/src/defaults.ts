@@ -18,6 +18,8 @@ export const starterConfig: BrandrailConfig = {
       },
       border: { default: { $type: "color", $value: "#d1d9e0", $description: "Borders and dividers" } },
       danger: { default: { $type: "color", $value: "#cf222e", $description: "Destructive actions, errors" } },
+      success: { default: { $type: "color", $value: "#1a7f37", $description: "Success messages, completed states" } },
+      attention: { default: { $type: "color", $value: "#9a6700", $description: "Warnings, needs attention" } },
     },
     font: {
       family: { sans: { $type: "fontFamily", $value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif" } },

@@ -8,7 +8,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./src/styles/index.css"
+    "./styles.css": "./src/styles/index.css",
+    "./props.json": "./src/props.generated.json"
   },
   "sideEffects": [
     "*.css"
@@ -33,7 +34,8 @@
     "typecheck": "tsc --noEmit",
     "build": "vite build && tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm run build",
-    "publish:github": "node scripts/publish-github.mjs"
+    "publish:github": "node scripts/publish-github.mjs",
+    "props": "node scripts/extract-props.mjs"
   },
   "dependencies": {
     "classnames": "^2.5.1",

@@ -2,7 +2,7 @@ import "server-only";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
-  checkSnippet,
+  check,
   ENGINE_VERSION,
   findComponentByName,
   findComponents,
@@ -50,6 +50,11 @@ function componentDoc(c: ComponentEntry): string {
   if (c.replaces?.length) lines.push("", `Use instead of: ${c.replaces.map((t) => `<${t}>`).join(", ")}`);
   if (c.aliases?.length) lines.push(`Also known as: ${c.aliases.join(", ")}`);
   if (c.usageRules?.length) lines.push("", "Rules:", ...c.usageRules.map((r) => `- ${r}`));
+  if (c.props?.length) {
+    lines.push("", "Props (these are the only props it accepts; * = required):");
+    for (const p of c.props) lines.push(`- \`${p.name}${p.required ? "*" : ""}\`${p.type ? `: ${p.type}` : ""}${p.description ? ` — ${p.description}` : ""}`);
+    if (c.htmlAttributes) lines.push(`- Also accepts native <${c.htmlAttributes}> attributes (id, aria-*, data-*, on* handlers…).`);
+  }
   if (c.example) lines.push("", "Example:", "```tsx", c.example, "```");
   return lines.join("\n");
 }
@@ -62,7 +67,8 @@ export function createBrandrailMcp(ctx: McpContext): McpServer {
     {
       instructions:
         `Design system for ${ctx.org}. Before writing UI: call get_guidelines once, use find_component for every UI element ` +
-        `and get_design_tokens for colours/spacing. After writing UI: call validate_snippet and fix every violation before finishing.`,
+        `(use only the props it lists) and get_design_tokens for colours/spacing. After writing UI: call validate_snippet once with ` +
+        `all changed files and fix every violation before finishing.`,
     },
   );
   const resolved = resolveConfig(ctx.config);
@@ -147,27 +153,43 @@ export function createBrandrailMcp(ctx: McpContext): McpServer {
     {
       title: "Validate UI code against the design system",
       description:
-        "Runs the Brandrail Checker on UI code you wrote (TSX/JSX/Vue/Svelte/HTML/CSS). Returns a brand score and each violation with the fix. Call after writing UI and fix every error and warning before finishing.",
+        "Runs the Brandrail Checker on UI code you wrote (TSX/JSX/Vue/Svelte/HTML/CSS). Returns a brand score and each violation with the fix. " +
+        "Call once after writing UI with every file you changed in `files`, and fix every error and warning before finishing.",
       inputSchema: {
-        code: z.string().min(1).max(100_000).describe("The full file or snippet"),
-        filename: z.string().max(200).default("snippet.tsx").describe("File name; the extension decides how it's parsed"),
+        files: z
+          .array(z.object({ filename: z.string().min(1).max(200), code: z.string().min(1).max(100_000) }))
+          .min(1)
+          .max(20)
+          .optional()
+          .describe("Every file you changed, checked together as one result. Preferred over code/filename."),
+        code: z.string().min(1).max(100_000).optional().describe("A single file or snippet (when not using files)"),
+        filename: z.string().max(200).default("snippet.tsx").describe("File name for code; the extension decides how it's parsed"),
         project: z.string().max(120).optional().describe("Repo or app name, e.g. fleet-portal (shown in the dashboard)"),
       },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
-    async ({ code, filename, project }) => {
-      const name = /\.(tsx|jsx|ts|js|vue|svelte|html|css|scss)$/i.test(filename) ? filename : `${filename}.tsx`;
-      const report = checkSnippet(code, name, ctx.config);
-      await ctx.record?.(report, { filename: name, project }).catch(() => undefined);
+    async ({ files, code, filename, project }) => {
+      const input = files?.length ? files : code ? [{ filename, code }] : [];
+      if (!input.length) return { ...text("Pass `files` (preferred) or `code`."), isError: true };
+      const named = input.map((f) => ({
+        path: /\.(tsx|jsx|ts|js|vue|svelte|html|css|scss)$/i.test(f.filename) ? f.filename : `${f.filename}.tsx`,
+        content: f.code,
+      }));
+      const report = check(named, ctx.config);
+      const label = named.length === 1 ? named[0]!.path : `${named.length} files (${named.map((f) => f.path.split("/").pop()).join(", ")})`;
+      await ctx.record?.(report, { filename: label, project }).catch(() => undefined);
       if (report.violations.length === 0) {
-        return text(`✅ Brand score ${report.score}/100 — no violations. This code follows the ${ctx.org} design system.`);
+        return text(`✅ Brand score ${report.score}/100 — no violations in ${label}. This code follows the ${ctx.org} design system.`);
       }
+      const many = named.length > 1;
       const lines = [
         `Brand score ${report.score}/100 — ${report.counts.error} errors, ${report.counts.warning} warnings, ${report.counts.info} info.`,
         "",
-        ...report.violations.map((v) => `- [${v.severity}] line ${v.line}: ${v.message}${v.suggestion ? ` → ${v.suggestion}` : ""} (${v.ruleId})`),
+        ...report.violations.map(
+          (v) => `- [${v.severity}] ${many ? `${v.file}:` : "line "}${v.line}: ${v.message}${v.suggestion ? ` → ${v.suggestion}` : ""} (${v.ruleId})`,
+        ),
         "",
-        "Fix every error and warning, then call validate_snippet again.",
+        "Fix every error and warning, then call validate_snippet again with the same files.",
       ];
       return text(lines.join("\n") + kitNote);
     },

@@ -37,7 +37,12 @@ export function generateInstructions(config: BrandrailConfig, opts: { org?: stri
     lines.push("Always use these components. Never re-create them with raw HTML elements:");
     for (const c of r.components) {
       const tags = [...r.replaces].filter(([, v]) => v === c).map(([t]) => `<${t}>`);
-      lines.push(`- \`${c.name}\` from \`${c.importPath}\`${tags.length ? ` (instead of ${tags.join(", ")})` : ""}`);
+      const props = c.props?.length ? ` — props: ${c.props.map((p) => (p.required ? `${p.name}*` : p.name)).join(", ")}` : "";
+      lines.push(`- \`${c.name}\` from \`${c.importPath}\`${tags.length ? ` (instead of ${tags.join(", ")})` : ""}${props}`);
+    }
+    if (r.components.some((c) => c.props?.length)) {
+      lines.push("");
+      lines.push("Pass only the props listed for each component (* = required). Any other prop is a type error and fails the check: if you need something a component doesn't take, look for a related component (often one with a longer name, like AvatarLabel next to Avatar) or compose it with design tokens.");
     }
     lines.push("");
   }

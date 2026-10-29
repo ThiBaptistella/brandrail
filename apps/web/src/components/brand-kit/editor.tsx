@@ -2,7 +2,9 @@
 
 import { useMemo, useState, useTransition } from "react";
 import {
+  AlertTriangle,
   Check as CheckIcon,
+  CircleX,
   Copy as CopyIcon,
   Download as DownloadIcon,
   Monitor as DeviceDesktopIcon,
@@ -15,7 +17,7 @@ import {
   Trash2,
   Upload as UploadIcon,
 } from "lucide-react";
-import { contrastRatio, parseColor } from "@brandrail/engine";
+import { auditBrandKit, contrastRatio, parseColor, type KitIssue } from "@brandrail/engine";
 import { Box, BoxHeader, Button, Flash, Label, Select, TextInput, cn } from "@brandrail/ui";
 import { publishBrandKitAction, type KitSource, type PublishResult } from "@/app/actions/brand-kit";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -84,12 +86,13 @@ export function BrandKitEditor({
 
   const dirty = kitKey(kit) !== kitKey(base);
   const invalid = validateKit(kit);
+  const issues = useMemo(() => auditBrandKit(toDtcg(kit)), [kit]);
   const upcoming = nextVersion(result?.ok ? result.version : version);
   const update = <K extends keyof BrandKitState>(key: K, fn: (prev: BrandKitState[K]) => BrandKitState[K]) => setKit((k) => ({ ...k, [key]: fn(k[key]) }));
 
-  const publish = () =>
+  const publish = (acceptIssues = false) =>
     startTransition(async () => {
-      const r = await publishBrandKitAction(kit, { source: source?.kind ?? "manual", notes: source?.summary });
+      const r = await publishBrandKitAction(kit, { source: source?.kind ?? "manual", notes: source?.summary, acceptIssues });
       setResult(r);
       if (r.ok) {
         setBase(kit);
@@ -139,7 +142,7 @@ export function BrandKitEditor({
             <Button leadingIcon={<UploadIcon size={14} />} onClick={() => setImporting(true)} disabled={!canPublish} title={canPublish ? undefined : "Only owners and admins can import"}>
               Import
             </Button>
-            <Button variant="primary" disabled={!dirty || pending || !canPublish || !!invalid} onClick={publish} aria-busy={pending} title={invalid ?? undefined}>
+            <Button variant="primary" disabled={!dirty || pending || !canPublish || !!invalid} onClick={() => publish()} aria-busy={pending} title={invalid ?? undefined}>
               {pending ? "Publishing…" : `Publish v${upcoming}`}
             </Button>
           </>
@@ -152,10 +155,20 @@ export function BrandKitEditor({
           {result.demo && " (Demo mode: nothing was saved. Connect Supabase to keep versions.)"}
         </Flash>
       )}
-      {result && !result.ok && <Flash tone="danger">{result.error}</Flash>}
+      {result && !result.ok && (
+        <Flash tone="danger" className="flex flex-wrap items-center justify-between gap-3">
+          <span>{result.error}</span>
+          {result.issues && (
+            <Button size="sm" variant="danger" disabled={pending} onClick={() => publish(true)}>
+              Publish anyway
+            </Button>
+          )}
+        </Flash>
+      )}
       {source && !result && <Flash tone="accent">{source.summary}. Review the tokens, then publish.</Flash>}
       {dirty && invalid && <Flash tone="attention">{invalid}</Flash>}
       {!canPublish && <Flash tone="attention">You can edit and preview, but only owners and admins can import or publish.</Flash>}
+      <KitChecks issues={issues} onShow={() => setSection("Colours")} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4 md:flex-row">
@@ -256,6 +269,49 @@ export function BrandKitEditor({
   );
 }
 
+/* ───────────────────────── Quality checks ───────────────────────── */
+
+/** What's wrong with the Brand Kit for the people using apps built from it. Errors ask for confirmation at publish. */
+function KitChecks({ issues, onShow }: { issues: KitIssue[]; onShow: () => void }) {
+  const [open, setOpen] = useState(true);
+  const errors = issues.filter((i) => i.severity === "error").length;
+  const warnings = issues.length - errors;
+  if (!issues.length) {
+    return (
+      <p className="flex items-center gap-2 text-xs text-fg-muted">
+        <CheckIcon size={14} className="text-success" /> Brand Kit checks passed: readable text and buttons, and every status colour is set.
+      </p>
+    );
+  }
+  return (
+    <Box>
+      <BoxHeader className="justify-between">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex items-center gap-2 text-left">
+          <h2 className="text-[13px] font-medium text-fg">Brand Kit checks</h2>
+          {errors > 0 && <Label tone="danger">{errors} {errors === 1 ? "error" : "errors"}</Label>}
+          {warnings > 0 && <Label tone="attention">{warnings} {warnings === 1 ? "warning" : "warnings"}</Label>}
+        </button>
+        <span className="hidden text-xs text-fg-muted sm:inline">Every app built from this kit inherits these</span>
+      </BoxHeader>
+      {open && (
+        <ul>
+          {issues.map((i, n) => (
+            <li key={n} className="flex items-start gap-2.5 border-b border-line px-4 py-2 text-sm last:border-0">
+              {i.severity === "error" ? <CircleX size={15} className="mt-0.5 shrink-0 text-danger" /> : <AlertTriangle size={15} className="mt-0.5 shrink-0 text-attention" />}
+              <span className="min-w-0 flex-1 text-fg">{i.message}</span>
+              {i.paths.length > 0 && (
+                <Button size="sm" variant="invisible" onClick={onShow} className="shrink-0 text-xs">
+                  Show
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Box>
+  );
+}
+
 /* ───────────────────────── Colours ───────────────────────── */
 
 function ColorsSection({ colors, onChange, dark }: { colors: ColorToken[]; onChange: (fn: (c: ColorToken[]) => ColorToken[]) => void; dark: boolean }) {
@@ -280,7 +336,8 @@ function ColorsSection({ colors, onChange, dark }: { colors: ColorToken[]; onCha
   const checks = [
     { label: "Text", ratio: contrast(roles.fg.value, roles.canvas.value), min: 4.5 },
     { label: "Muted", ratio: contrast(roles.muted.value, roles.canvas.value), min: 4.5 },
-    { label: "On primary", ratio: contrast("#ffffff", roles.primary.value), min: 4.5 },
+    // Same choice as the kit mapping: whichever of the light background or text colour reads better on the fill.
+    { label: "On primary", ratio: Math.max(contrast(pickRoles(colors).canvas.value, roles.primary.value), contrast(pickRoles(colors).fg.value, roles.primary.value)), min: 4.5 },
   ];
   const add = () => {
     const id = uid();

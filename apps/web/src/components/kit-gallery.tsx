@@ -4,6 +4,7 @@ import { useId, useMemo, useState } from "react";
 import {
   Avatar,
   AvatarGroup,
+  AvatarLabel,
   AvatarState,
   Breadcrumb,
   Button,
@@ -139,6 +140,7 @@ const DEMOS: Record<string, Demo> = {
   },
   ProgressBar: { render: (p) => <div className="w-full"><ProgressBar {...p} value={82} size={Size.SMALL} /></div> },
   Avatar: { render: (p) => <Avatar {...p} initials="TB" state={AvatarState.ONLINE} size={Size.MEDIUM} /> },
+  AvatarLabel: { render: (p) => <AvatarLabel {...p} initials="TB" name="Thiago Baptistella" caption="Engineer" state={AvatarState.ONLINE} size={Size.MEDIUM} /> },
   AvatarGroup: { render: (p) => <AvatarGroup {...p} maxDisplay={3} avatars={[{ initials: "JO" }, { initials: "PR" }, { initials: "SA" }, { initials: "MK" }]} /> },
   Breadcrumb: { render: (p) => <Breadcrumb {...p} size={Size.SMALL} items={[{ label: "Fleet", href: "#" }, { label: "Haul trucks", href: "#" }, { label: "HT-204", isCurrent: true }]} /> },
   Tooltip: {

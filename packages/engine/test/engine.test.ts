@@ -10,7 +10,7 @@ const only = (code: string, rule: string, file = "src/App.tsx") =>
 
 test("resolves tokens into colours, spacing, radii and fonts", () => {
   const r = resolveConfig(cfg);
-  assert.equal(r.colors.length, 8);
+  assert.equal(r.colors.length, 10);
   assert.ok(r.spacing.includes(8) && r.spacing.includes(16) && r.spacing.includes(4));
   assert.ok(!r.spacing.includes(13));
   assert.deepEqual(r.radii.filter((x) => x < 999), [0, 3, 6, 12]);

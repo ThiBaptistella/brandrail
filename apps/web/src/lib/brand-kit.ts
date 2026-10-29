@@ -26,7 +26,7 @@ const SYSTEM_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
 
 export const defaultBrandKit: BrandKitState = {
   colors: [
-    { path: "color.action.primary", value: "#1f883d", dark: "#238636", note: "One primary action per view" },
+    { path: "color.action.primary", value: "#1f883d", dark: "#2ea043", note: "One primary action per view" },
     { path: "color.accent.default", value: "#0969da", dark: "#4493f8", note: "Links, focus, selection" },
     { path: "color.fg.default", value: "#1f2328", dark: "#f0f6fc", note: "Body text" },
     { path: "color.fg.muted", value: "#59636e", dark: "#9198a1", note: "Secondary text" },
@@ -34,6 +34,8 @@ export const defaultBrandKit: BrandKitState = {
     { path: "color.canvas.subtle", value: "#f6f8fa", dark: "#151b23", note: "Headers, wells" },
     { path: "color.border.default", value: "#d1d9e0", dark: "#3d444d", note: "Borders and dividers" },
     { path: "color.danger.default", value: "#cf222e", dark: "#f85149", note: "Destructive actions, errors" },
+    { path: "color.success.default", value: "#1a7f37", dark: "#3fb950", note: "Success messages, completed states" },
+    { path: "color.attention.default", value: "#9a6700", dark: "#d29922", note: "Warnings, needs attention" },
   ].map((c, i) => ({ ...c, id: `c${i}` })),
   fonts: [
     { id: "f0", name: "sans", value: SYSTEM_SANS },

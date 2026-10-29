@@ -44,7 +44,7 @@
     line-height: var(--fontA-lineHeightXs);
     font-family: var(--fontA-fontFamily);
     font-weight: 400;
-    color: var(----stateBrandActive);
+    color: var(--stateBrandActive);
   }
 }
 

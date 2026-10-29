@@ -1,6 +1,6 @@
 import "server-only";
 import { ruleTitle as engineRuleTitle, starterConfig, type BrandrailConfig, type ComponentEntry } from "@brandrail/engine";
-import { KIT_REGISTRY } from "./kit-registry";
+import { KIT_REGISTRY, withKitProps } from "./kit-registry";
 import { isSupabaseConfigured } from "./env";
 import * as mock from "./mock";
 import type { Organization, Role } from "./session";
@@ -345,7 +345,7 @@ export interface RegistryComponent extends ComponentEntry {
   updatedAt: string | null;
 }
 
-const COMPONENT_COLS = "id, name, import_path, description, usage_rules, status, replaces, aliases, example, updated_at";
+const COMPONENT_COLS = "id, name, import_path, description, usage_rules, status, replaces, aliases, example, props_schema, updated_at";
 type ComponentDb = {
   id: string;
   name: string;
@@ -356,6 +356,7 @@ type ComponentDb = {
   replaces: string[] | null;
   aliases: string[] | null;
   example: string | null;
+  props_schema: { props?: ComponentEntry["props"]; htmlAttributes?: string } | null;
   updated_at: string | null;
 };
 const toComponent = (c: ComponentDb): RegistryComponent => ({
@@ -368,6 +369,8 @@ const toComponent = (c: ComponentDb): RegistryComponent => ({
   replaces: c.replaces?.length ? c.replaces : undefined,
   aliases: c.aliases?.length ? c.aliases : undefined,
   example: c.example ?? undefined,
+  props: c.props_schema?.props?.length ? c.props_schema.props : undefined,
+  htmlAttributes: c.props_schema?.htmlAttributes,
   updatedAt: c.updated_at,
 });
 
@@ -378,7 +381,7 @@ export async function listComponents(org: Organization): Promise<{ rows: Registr
   if (!isSupabaseConfigured) return { rows: demoRegistry(), sample: true };
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.from("components").select(COMPONENT_COLS).eq("org_id", org.id).order("name");
-  return { rows: ((data ?? []) as ComponentDb[]).map(toComponent), sample: false };
+  return { rows: withKitProps(((data ?? []) as ComponentDb[]).map(toComponent)), sample: false };
 }
 
 /** The org's published Brand Kit as an engine config (falls back to the starter kit). */
@@ -397,8 +400,7 @@ export async function getOrgEngineConfig(org: Organization): Promise<{ config: B
       .maybeSingle(),
     supabase.from("components").select(COMPONENT_COLS).eq("org_id", org.id).neq("status", "deprecated"),
   ]);
-  const components: ComponentEntry[] = ((comps ?? []) as ComponentDb[])
-    .map(toComponent)
+  const components: ComponentEntry[] = withKitProps(((comps ?? []) as ComponentDb[]).map(toComponent))
     .map(({ id: _id, updatedAt: _updatedAt, ...entry }) => entry);
   if (!kit) return { config: { ...starterConfig, components: components.length ? components : starterConfig.components }, published: false };
   return {

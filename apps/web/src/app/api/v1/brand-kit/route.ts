@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { bearer } from "@/lib/api-keys";
 import { isSupabaseConfigured } from "@/lib/env";
+import { withKitProps } from "@/lib/kit-registry";
 import { createSupabaseAnonClient } from "@/lib/supabase/anon";
 
 type BrandKitRow = {
@@ -8,7 +9,7 @@ type BrandKitRow = {
   slug: string;
   tokenVersion: string | null;
   tokens: Record<string, unknown>;
-  components: Array<{ name: string; importPath: string }>;
+  components: Array<{ name: string; importPath: string; props?: Array<{ name: string }> }>;
 };
 
 /** The published Brand Kit as a brandrail.config.json, for the CLI, GitHub Action and MCP server. */
@@ -28,6 +29,6 @@ export async function GET(req: NextRequest) {
   }
   return NextResponse.json({
     org: kit.org,
-    config: { org: kit.slug, tokenVersion: kit.tokenVersion, tokens: kit.tokens, components: kit.components },
+    config: { org: kit.slug, tokenVersion: kit.tokenVersion, tokens: kit.tokens, components: withKitProps(kit.components ?? []) },
   });
 }

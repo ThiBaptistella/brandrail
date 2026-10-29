@@ -1,0 +1,1214 @@
+{
+  "Avatar": {
+    "props": [
+      {
+        "name": "initials",
+        "type": "string",
+        "required": true,
+        "description": "The initials to display if no image is provided. Should be 2 characters."
+      },
+      {
+        "name": "alt",
+        "type": "string",
+        "description": "Alternative text for the avatar image, used for accessibility."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the avatar uses light or dark mode."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Size of the avatar (small, medium, large)."
+      },
+      {
+        "name": "src",
+        "type": "string",
+        "description": "URL of the avatar image. If not provided, initials will be displayed."
+      },
+      {
+        "name": "state",
+        "type": "AvatarState (AvatarState.DEFAULT | AvatarState.ONLINE | AvatarState.AWAY | AvatarState.BUSY | AvatarState.OFFLINE)",
+        "description": "The current state of the avatar, representing user presence."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Theme variation for styling the avatar."
+      }
+    ]
+  },
+  "AvatarLabel": {
+    "props": [
+      {
+        "name": "initials",
+        "type": "string",
+        "required": true,
+        "description": "The initials to display if no image is provided. Should be 2 characters."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "The full name associated with the avatar."
+      },
+      {
+        "name": "alt",
+        "type": "string",
+        "description": "Alternative text for the avatar image, used for accessibility."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "Additional caption or role displayed below the name."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the avatar label uses light or dark mode."
+      },
+      {
+        "name": "icon",
+        "type": "React.ReactElement",
+        "description": "Optional icon displayed alongside the avatar label."
+      },
+      {
+        "name": "reverse",
+        "type": "boolean",
+        "description": "If true, reverses the avatar and label position."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Size of the avatar (small, medium, large)."
+      },
+      {
+        "name": "src",
+        "type": "string",
+        "description": "URL of the avatar image. If not provided, initials will be displayed."
+      },
+      {
+        "name": "state",
+        "type": "AvatarState (AvatarState.DEFAULT | AvatarState.ONLINE | AvatarState.AWAY | AvatarState.BUSY | AvatarState.OFFLINE)",
+        "description": "The current state of the avatar, representing user presence."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Theme variation for styling the avatar label."
+      }
+    ]
+  },
+  "AvatarGroup": {
+    "props": [
+      {
+        "name": "avatars",
+        "type": "AvatarProps[]",
+        "required": true,
+        "description": "List of avatars to display in a grouped layout."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the avatar group uses light or dark mode."
+      },
+      {
+        "name": "maxDisplay",
+        "type": "number",
+        "description": "Maximum number of avatars to display before truncating."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Theme variation for styling the avatar group."
+      }
+    ]
+  },
+  "Breadcrumb": {
+    "props": [
+      {
+        "name": "items",
+        "type": "BreadcrumbItem[]",
+        "required": true,
+        "description": "An array of breadcrumb items to display."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the breadcrumb uses light or dark mode."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the breadcrumb size."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the breadcrumb."
+      }
+    ]
+  },
+  "Button": {
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "The text displayed inside the button."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the button uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the button, preventing user interaction."
+      },
+      {
+        "name": "iconLeft",
+        "type": "React.ReactElement",
+        "description": "Adds an icon before the button label."
+      },
+      {
+        "name": "iconRight",
+        "type": "React.ReactElement",
+        "description": "Adds an icon after the button label."
+      },
+      {
+        "name": "onClick",
+        "type": "() => void",
+        "description": "Function triggered when the button is clicked."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the button size."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the button."
+      },
+      {
+        "name": "type",
+        "type": "ButtonType (ButtonType.CTA | ButtonType.GHOST | ButtonType.DANGER)",
+        "description": "Defines the button type (e.g., \"button\", \"submit\", \"reset\")."
+      }
+    ]
+  },
+  "ButtonGroup": {
+    "props": [
+      {
+        "name": "children",
+        "type": "React.ReactElement<ButtonProps, string | React.JSXElementConstructor<any>> | React.ReactElement<ButtonProps, string | React.JSXElementConstructor<any>>[]",
+        "required": true
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)"
+      },
+      {
+        "name": "orientation",
+        "type": "Orientation (Orientation.HORIZONTAL | Orientation.VERTICAL)"
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)"
+      },
+      {
+        "name": "theme",
+        "type": "string"
+      }
+    ],
+    "htmlAttributes": "div"
+  },
+  "Checkbox": {
+    "props": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Determines if the checkbox is checked or unchecked."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the checkbox uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the checkbox, making it unclickable."
+      },
+      {
+        "name": "indeterminate",
+        "type": "boolean",
+        "description": "Sets the checkbox to an indeterminate state."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The label text displayed next to the checkbox."
+      },
+      {
+        "name": "onChange",
+        "type": "(e: React.ChangeEvent<HTMLInputElement, Element>) => void",
+        "description": "Function triggered when a selection is made."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the checkbox."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies a custom theme variation."
+      }
+    ],
+    "htmlAttributes": "input"
+  },
+  "CheckboxButton": {
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "The main label displayed alongside the checkbox."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "Additional description or subtext displayed below the label."
+      },
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Determines if the checkbox is checked or unchecked."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the checkbox uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the checkbox, making it unclickable."
+      },
+      {
+        "name": "icon",
+        "type": "React.ReactElement",
+        "description": "An optional icon displayed next to the label."
+      },
+      {
+        "name": "indeterminate",
+        "type": "boolean",
+        "description": "Sets the checkbox to an indeterminate state."
+      },
+      {
+        "name": "onChange",
+        "type": "(e: React.ChangeEvent<HTMLInputElement, Element>) => void",
+        "description": "Function triggered when a selection is made."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the checkbox."
+      },
+      {
+        "name": "tag",
+        "type": "string",
+        "description": "A small tag or badge displayed next to the label."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies a custom theme variation."
+      }
+    ],
+    "htmlAttributes": "input"
+  },
+  "CheckboxGroup": {
+    "props": [
+      {
+        "name": "children",
+        "type": "React.ReactElement<CheckboxLabelProps, string | React.JSXElementConstructor<any>> | React.ReactElement<CheckboxLabelProps, string | React.JSXElementConstructor<any>>[]",
+        "required": true,
+        "description": "One or multiple `CheckboxLabel` components. Ensures type safety."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "A brief description under the title."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the component uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables all checkboxes in the group."
+      },
+      {
+        "name": "layout",
+        "type": "Layout (Layout.ROW | Layout.COLUMN)",
+        "description": "Defines the layout direction of the checkbox group."
+      },
+      {
+        "name": "onChange",
+        "type": "(selectedValues: string[]) => void",
+        "description": "Callback function triggered when the selection changes."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Controls the size of the checkboxes within the group."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title displayed at the top of the checkbox group."
+      }
+    ],
+    "htmlAttributes": "div"
+  },
+  "DatePicker": {
+    "props": [
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the DatePicker uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the DatePicker input field."
+      },
+      {
+        "name": "events",
+        "type": "Date[]",
+        "description": "Array of dates to highlight as events."
+      },
+      {
+        "name": "formatPattern",
+        "type": "string",
+        "description": "Custom format for the displayed date."
+      },
+      {
+        "name": "isRange",
+        "type": "boolean",
+        "description": "Enables date range selection."
+      },
+      {
+        "name": "onChange",
+        "type": "(date: Date | null) => void",
+        "description": "Callback function triggered when a new date is selected."
+      },
+      {
+        "name": "onRangeSelect",
+        "type": "(range: DateRange) => void",
+        "description": "Callback function triggered when a date range is selected."
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Placeholder text displayed inside the input field."
+      },
+      {
+        "name": "range",
+        "type": "DateRange",
+        "description": "Defines the selected date range (start and end)."
+      },
+      {
+        "name": "selectedDate",
+        "type": "Date",
+        "description": "The currently selected date."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Defines the size of the DatePicker."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "Calendar": {
+    "props": [
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the calendar uses light or dark mode."
+      },
+      {
+        "name": "eventDate",
+        "type": "CalendarEvent[]",
+        "description": "List of events associated with specific dates."
+      },
+      {
+        "name": "onDateSelect",
+        "type": "(date: Date) => void",
+        "description": "Callback function triggered when a date is selected."
+      },
+      {
+        "name": "onNewEventClick",
+        "type": "() => void",
+        "description": "Callback function triggered when adding a new event."
+      },
+      {
+        "name": "selectedDate",
+        "type": "Date",
+        "description": "The currently selected date in the calendar."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the calendar size."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "Divider": {
+    "props": [
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the divider uses light or dark mode."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "Optional label to be displayed within the divider."
+      },
+      {
+        "name": "labelAlignment",
+        "type": "Align (Align.LEFT | Align.CENTER | Align.RIGHT | Align.TOP | Align.BOTTOM | Align.NONE)",
+        "description": "Aligns the label within the divider."
+      },
+      {
+        "name": "orientation",
+        "type": "Orientation (Orientation.HORIZONTAL | Orientation.VERTICAL)",
+        "description": "Defines the orientation of the divider (horizontal or vertical)."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ],
+    "htmlAttributes": "div"
+  },
+  "Dropdown": {
+    "props": [
+      {
+        "name": "children",
+        "type": "React.ReactElement<ListItemProps, string | React.JSXElementConstructor<any>> | React.ReactElement<ListItemProps, string | React.JSXElementConstructor<any>>[]",
+        "required": true,
+        "description": "Accepts `ListItem` components directly as children."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the dropdown uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the dropdown, preventing user interaction."
+      },
+      {
+        "name": "onChange",
+        "type": "(index: number) => void",
+        "description": "Function triggered when a selection is made (returns index)."
+      },
+      {
+        "name": "selected",
+        "type": "number",
+        "description": "Controls the selected index of the dropdown."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the dropdown size."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "List": {
+    "props": [
+      {
+        "name": "children",
+        "type": "string | number | bigint | boolean | React.ReactElement | Iterable<React.ReactNode> | React.ReactPortal | Promise<AwaitedReactNode>",
+        "required": true,
+        "description": "Accepts `ListItem` components as children."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the dropdown list uses light or dark mode."
+      },
+      {
+        "name": "onSelect",
+        "type": "(index: number) => void",
+        "description": "Callback function triggered when a selection is made."
+      },
+      {
+        "name": "selected",
+        "type": "number",
+        "description": "Controls the selected item(s) in the dropdown list."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the dropdown list."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "ListItem": {
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "The text displayed inside the list item."
+      },
+      {
+        "name": "value",
+        "type": "string | number",
+        "required": true,
+        "description": "The unique value associated with the list item."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "Additional descriptive text below the main label."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the list item uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables interactions with the list item."
+      },
+      {
+        "name": "iconLeft",
+        "type": "React.ReactElement",
+        "description": "Adds an icon before the label."
+      },
+      {
+        "name": "iconRight",
+        "type": "React.ReactElement",
+        "description": "Adds an icon after the label."
+      },
+      {
+        "name": "onSelect",
+        "type": "(value: string | number) => void",
+        "description": "Function triggered when the list item is selected."
+      },
+      {
+        "name": "selected",
+        "type": "boolean",
+        "description": "Marks the item as selected."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the list item."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "InputText": {
+    "props": [
+      {
+        "name": "caption",
+        "type": "Omit<CaptionProps, \"icon\">",
+        "description": "Provides an additional caption with optional status."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the input field uses light or dark mode."
+      },
+      {
+        "name": "iconCaption",
+        "type": "React.ReactElement",
+        "description": "Adds an icon inside the caption."
+      },
+      {
+        "name": "iconLeft",
+        "type": "React.ReactElement",
+        "description": "Adds an icon before the input field."
+      },
+      {
+        "name": "iconRight",
+        "type": "React.ReactElement",
+        "description": "Adds an icon after the input field."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The label displayed above the input field."
+      },
+      {
+        "name": "onChange",
+        "type": "(e: React.ChangeEvent<HTMLInputElement, Element>) => void",
+        "description": "Function triggered when the value changes."
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Placeholder text inside the input field."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the input field."
+      },
+      {
+        "name": "state",
+        "type": "State (State.DEFAULT | State.FOCUSED | State.ERROR | State.SUCCESS | State.WARNING | State.DISABLED)",
+        "description": "Determines the current state of the input field."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      },
+      {
+        "name": "type",
+        "type": "InputTextType (InputTextType.TEXT | InputTextType.NUMBER | InputTextType.PASSWORD)",
+        "description": "Defines the type of input field."
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "Controls the input value."
+      }
+    ]
+  },
+  "InputTextArea": {
+    "props": [
+      {
+        "name": "caption",
+        "type": "Omit<CaptionProps, \"icon\">",
+        "description": "Provides an additional caption with optional status."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the text area uses light or dark mode."
+      },
+      {
+        "name": "iconCaption",
+        "type": "React.ReactElement",
+        "description": "Adds an icon inside the caption."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The label displayed above the text area."
+      },
+      {
+        "name": "onChange",
+        "type": "(e: React.ChangeEvent<HTMLTextAreaElement, Element>) => void",
+        "description": "Function triggered when the value changes."
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Placeholder text inside the text area."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the text area."
+      },
+      {
+        "name": "state",
+        "type": "State (State.DEFAULT | State.FOCUSED | State.ERROR | State.SUCCESS | State.WARNING | State.DISABLED)",
+        "description": "Determines the current state of the text area."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "Controls the text area value."
+      }
+    ]
+  },
+  "Caption": {
+    "props": [
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the caption uses light or dark mode."
+      },
+      {
+        "name": "icon",
+        "type": "React.ReactElement",
+        "description": "Adds an optional icon inside the caption."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the caption."
+      },
+      {
+        "name": "status",
+        "type": "CaptionStatus (CaptionStatus.INFO | CaptionStatus.SUCCESS | CaptionStatus.ERROR | CaptionStatus.WARNING)",
+        "description": "Defines the status of the caption."
+      },
+      {
+        "name": "strength",
+        "type": "number",
+        "description": "Represents a percentage value for strength indicators."
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "description": "The text displayed inside the caption."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      },
+      {
+        "name": "type",
+        "type": "CaptionType (CaptionType.TEXT | CaptionType.GAUGE)",
+        "description": "Determines the visual type of the caption."
+      }
+    ]
+  },
+  "Loader": {
+    "props": [
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "Optional text displayed below the loader."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Determines the color mode of the loader."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the loader."
+      }
+    ]
+  },
+  "Notification": {
+    "props": [
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Toggles between light and dark mode."
+      },
+      {
+        "name": "icon",
+        "type": "React.ReactElement",
+        "description": "The optional icon displayed alongside the notification."
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "description": "The message content inside the notification."
+      },
+      {
+        "name": "onClose",
+        "type": "() => void",
+        "description": "Function triggered when the close button is clicked."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the notification."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Selects the theme variant for styling."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title displayed in the notification."
+      },
+      {
+        "name": "type",
+        "type": "NotificationType (NotificationType.INFO | NotificationType.SUCCESS | NotificationType.WARNING | NotificationType.ERROR)",
+        "description": "Determines the type of notification (e.g., info, success, warning, error)."
+      }
+    ]
+  },
+  "ProgressBar": {
+    "props": [
+      {
+        "name": "value",
+        "type": "number",
+        "required": true,
+        "description": "The current progress value as a percentage (0-100)."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Toggles between light and dark mode."
+      },
+      {
+        "name": "labelPosition",
+        "type": "Align (Align.LEFT | Align.CENTER | Align.RIGHT | Align.TOP | Align.BOTTOM | Align.NONE)",
+        "description": "Determines where the progress label is displayed."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the progress bar."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ]
+  },
+  "RadioButton": {
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "The main label of the radio button."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "Optional caption text beneath the label."
+      },
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Specifies whether the radio button is selected."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the radio button uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the radio button."
+      },
+      {
+        "name": "icon",
+        "type": "React.ReactElement",
+        "description": "Adds an optional icon to the radio button."
+      },
+      {
+        "name": "onChange",
+        "type": "(event: React.ChangeEvent<HTMLInputElement, Element>) => void",
+        "description": "Function triggered when the radio button is selected."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the radio button."
+      },
+      {
+        "name": "tag",
+        "type": "string",
+        "description": "A tag label (e.g., status or category) displayed next to the radio button."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ],
+    "htmlAttributes": "input"
+  },
+  "Radio": {
+    "props": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Specifies whether the radio button is selected."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the radio button uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the radio button."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text displayed beside the radio button."
+      },
+      {
+        "name": "onChange",
+        "type": "(event: React.ChangeEvent<HTMLInputElement, Element>) => void",
+        "description": "Function triggered when the radio button is selected."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the radio button."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations."
+      }
+    ],
+    "htmlAttributes": "input"
+  },
+  "RadioGroup": {
+    "props": [
+      {
+        "name": "children",
+        "type": "React.ReactElement<RadioLabelProps, string | React.JSXElementConstructor<any>> | React.ReactElement<RadioLabelProps, string | React.JSXElementConstructor<any>>[]",
+        "required": true,
+        "description": "Defines the child radio labels (only accepts `Radio` components)."
+      },
+      {
+        "name": "caption",
+        "type": "string",
+        "description": "A caption providing additional information about the radio group."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the group uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables all radio buttons in the group."
+      },
+      {
+        "name": "layout",
+        "type": "Layout (Layout.ROW | Layout.COLUMN)",
+        "description": "Defines the arrangement of radio buttons within the group."
+      },
+      {
+        "name": "onChange",
+        "type": "(selectedValue: string) => void",
+        "description": "Callback function triggered when a radio button is selected."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the radio buttons in the group."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the group."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title displayed above the radio group."
+      }
+    ],
+    "htmlAttributes": "div"
+  },
+  "Scrollbar": {
+    "props": [
+      {
+        "name": "children",
+        "type": "string | number | bigint | boolean | React.ReactElement | Iterable<React.ReactNode> | React.ReactPortal | Promise<AwaitedReactNode>",
+        "required": true,
+        "description": "Content inside the scrollable area."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the scrollbar uses light or dark mode."
+      },
+      {
+        "name": "orientation",
+        "type": "Orientation (Orientation.HORIZONTAL | Orientation.VERTICAL)",
+        "description": "Defines the scroll direction: `vertical` for top-to-bottom, `horizontal` for side-scrolling."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the scrollbar."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the scrollbar."
+      }
+    ],
+    "htmlAttributes": "div"
+  },
+  "Toggle": {
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": "The text label displayed alongside the toggle switch."
+      },
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Defines if the toggle is checked (on or off)."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines whether the toggle uses light or dark mode."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables the toggle, preventing user interaction."
+      },
+      {
+        "name": "iconLeft",
+        "type": "React.ReactElement",
+        "description": "Adds an icon before the toggle switch."
+      },
+      {
+        "name": "iconRight",
+        "type": "React.ReactElement",
+        "description": "Adds an icon after the toggle switch."
+      },
+      {
+        "name": "labelPosition",
+        "type": "Align (Align.LEFT | Align.CENTER | Align.RIGHT | Align.TOP | Align.BOTTOM | Align.NONE)",
+        "description": "Determines the position of the label relative to the toggle."
+      },
+      {
+        "name": "onChange",
+        "type": "(checked: boolean) => void",
+        "description": "Callback function triggered when the toggle state changes."
+      },
+      {
+        "name": "size",
+        "type": "Size (Size.SMALL | Size.MEDIUM | Size.LARGE)",
+        "description": "Adjusts the size of the toggle."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the toggle."
+      }
+    ],
+    "htmlAttributes": "input"
+  },
+  "Tooltip": {
+    "props": [
+      {
+        "name": "children",
+        "type": "string | number | bigint | boolean | React.ReactElement | Iterable<React.ReactNode> | React.ReactPortal | Promise<AwaitedReactNode>",
+        "required": true,
+        "description": "The element the tooltip wraps around."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines the color mode of the tooltip."
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "description": "The main content displayed inside the tooltip."
+      },
+      {
+        "name": "position",
+        "type": "TooltipPosition (TooltipPosition.TOP_LEFT | TooltipPosition.TOP_CENTER | TooltipPosition.TOP_RIGHT | TooltipPosition.BOTTOM_LEFT | TooltipPosition.BOTTOM_CENTER | TooltipPosition.BOTTOM_RIGHT | TooltipPosition.LEFT | TooltipPosition.RIGHT)",
+        "description": "Position of the tooltip relative to the element."
+      },
+      {
+        "name": "style",
+        "type": "TooltipStyle (TooltipStyle.SIMPLE | TooltipStyle.DESCRIPTIVE | TooltipStyle.CHART)",
+        "description": "Style of tooltip (simple, descriptive, chart)."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Defines the theme of the tooltip."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Title for descriptive and chart tooltips."
+      }
+    ]
+  },
+  "VideoPlayer": {
+    "props": [
+      {
+        "name": "src",
+        "type": "string",
+        "required": true,
+        "description": "The video source URL or local file path."
+      },
+      {
+        "name": "className",
+        "type": "string",
+        "description": "Optional additional class names for styling."
+      },
+      {
+        "name": "colorMode",
+        "type": "ColorMode (ColorMode.LIGHT | ColorMode.DARK)",
+        "description": "Defines the color mode of the video player."
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "description": "Applies theme variations to the video player."
+      }
+    ]
+  }
+}

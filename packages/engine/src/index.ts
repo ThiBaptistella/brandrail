@@ -1,4 +1,4 @@
-export type { BrandrailConfig, ComponentEntry, DtcgDoc, Report, RuleSetting, Severity, SourceFile, Violation } from "./types.ts";
+export type { BrandrailConfig, ComponentEntry, DtcgDoc, PropSpec, Report, RuleSetting, Severity, SourceFile, Violation } from "./types.ts";
 export { resolveConfig, DEFAULT_IGNORE, DEFAULT_FORBIDDEN_IMPORTS, type ResolvedConfig } from "./config.ts";
 export { check, checkSnippet, computeScore, isScannable, ENGINE_VERSION, type CheckOptions } from "./check.ts";
 export { RULES, RULE_IDS, type Rule } from "./rules.ts";
@@ -47,3 +47,4 @@ export {
 } from "./rendered.ts";
 export { generateTokensCss } from "./tokens-css.ts";
 export { kitBridgeCss, pickColorRoles, type ColorRole } from "./kit-bridge.ts";
+export { auditBrandKit, type KitIssue } from "./brand-kit-audit.ts";

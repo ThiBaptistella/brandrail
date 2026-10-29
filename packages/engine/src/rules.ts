@@ -1,7 +1,7 @@
 import { deltaE, parseColor, rgbToLab } from "./color.ts";
 import { isGenericFont, nearest, normalizeFontFamily, type ResolvedConfig } from "./config.ts";
 import type { FileKind } from "./source.ts";
-import type { Severity } from "./types.ts";
+import type { ComponentEntry, Severity } from "./types.ts";
 
 export interface Finding {
   offset: number;
@@ -314,6 +314,123 @@ export const imgAlt: Rule = {
   },
 };
 
+/** Native attributes accepted by components that extend an HTML element (htmlAttributes). */
+const NATIVE_ATTRS = new Set(
+  "id className style title role tabIndex hidden lang dir name value defaultValue defaultChecked checked disabled required readOnly autoFocus autoComplete placeholder type min max step maxLength minLength pattern form accept multiple href target rel download children".split(" "),
+);
+const ALWAYS_OK = new Set(["key", "ref"]);
+
+/** Local names imported from each component's package: `import { Avatar, Button as Btn } from "@acme/ui"`. */
+function importedComponents(code: string, components: ComponentEntry[]): Map<string, ComponentEntry> {
+  const out = new Map<string, ComponentEntry>();
+  for (const m of matches(/\bimport\s+(?:type\s+)?\{([^}]*)\}\s*from\s*(['"])([^'"]+)\2/g, code)) {
+    const from = m[3]!;
+    for (const part of m[1]!.split(",")) {
+      const [orig, alias] = part.trim().replace(/^type\s+/, "").split(/\s+as\s+/).map((s) => s.trim());
+      if (!orig) continue;
+      const comp = components.find((c) => c.name === orig && c.importPath === from && c.props?.length);
+      if (comp) out.set(alias || orig, comp);
+    }
+  }
+  return out;
+}
+
+/** Skips a {…} expression or a quoted string starting at i; returns the index after it. */
+function skipBalanced(code: string, i: number): number {
+  const open = code[i];
+  if (open === '"' || open === "'") {
+    const end = code.indexOf(open, i + 1);
+    return end === -1 ? code.length : end + 1;
+  }
+  let depth = 0;
+  let quote: string | null = null;
+  for (let j = i; j < code.length; j++) {
+    const c = code[j]!;
+    if (quote) {
+      if (c === "\\") j++;
+      else if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") quote = c;
+    else if (c === "{") depth++;
+    else if (c === "}" && --depth === 0) return j + 1;
+  }
+  return code.length;
+}
+
+/** Attributes of the JSX opening tag starting right after `<Name`. */
+function parseAttributes(code: string, start: number): { attrs: Array<{ name: string; offset: number }>; spread: boolean; selfClosing: boolean } | null {
+  const attrs: Array<{ name: string; offset: number }> = [];
+  let spread = false;
+  let i = start;
+  while (i < code.length) {
+    while (/\s/.test(code[i] ?? "")) i++;
+    const c = code[i];
+    if (c === undefined) return null;
+    if (c === ">") return { attrs, spread, selfClosing: false };
+    if (c === "/" && code[i + 1] === ">") return { attrs, spread, selfClosing: true };
+    if (c === "{") {
+      spread = true;
+      i = skipBalanced(code, i);
+      continue;
+    }
+    const name = /^[A-Za-z_$][\w$:.-]*/.exec(code.slice(i, i + 80))?.[0];
+    if (!name) return null; // not JSX after all
+    attrs.push({ name, offset: i });
+    i += name.length;
+    while (/\s/.test(code[i] ?? "")) i++;
+    if (code[i] === "=") {
+      i++;
+      while (/\s/.test(code[i] ?? "")) i++;
+      i = skipBalanced(code, i);
+    }
+  }
+  return null;
+}
+
+export const componentProps: Rule = {
+  id: "component-props",
+  title: "Unknown or missing prop",
+  description: "Design system components only accept their documented props, and required props must be passed.",
+  defaultSeverity: "error",
+  kinds: ["jsx"],
+  check({ code, config }) {
+    if (!config.components.some((c) => c.props?.length)) return [];
+    const imported = importedComponents(code, config.components);
+    if (imported.size === 0) return [];
+    const out: Finding[] = [];
+    const names = [...imported.keys()].map((n) => n.replace(/[$]/g, "\\$")).join("|");
+    for (const m of matches(new RegExp(`<(${names})(?=[\\s/>])`, "g"), code)) {
+      if (/[\w)\]]\s*$/.test(code.slice(Math.max(0, m.index - 20), m.index))) continue; // generics / comparisons
+      const comp = imported.get(m[1]!)!;
+      const parsed = parseAttributes(code, m.index + m[0].length);
+      if (!parsed) continue;
+      const own = new Map(comp.props!.map((p) => [p.name, p]));
+      const list = comp.props!.map((p) => (p.required ? `${p.name} (required)` : p.name)).join(", ");
+      for (const a of parsed.attrs) {
+        if (own.has(a.name) || ALWAYS_OK.has(a.name) || a.name.includes("-")) continue;
+        if (comp.htmlAttributes && (NATIVE_ATTRS.has(a.name) || /^on[A-Z]/.test(a.name) || /^aria/.test(a.name))) continue;
+        const sibling = config.components.find(
+          (c) => c !== comp && c.importPath === comp.importPath && (c.name.startsWith(comp.name) || comp.name.startsWith(c.name)) && c.props?.some((p) => p.name === a.name),
+        );
+        out.push({
+          offset: a.offset,
+          message: `<${comp.name}> has no "${a.name}" prop`,
+          suggestion: sibling ? `Use <${sibling.name}>, which has "${a.name}", or remove it. ${comp.name} props: ${list}` : `Remove it. ${comp.name} props: ${list}`,
+        });
+      }
+      if (!parsed.spread) {
+        const passed = new Set(parsed.attrs.map((a) => a.name));
+        for (const p of comp.props!) {
+          if (!p.required || passed.has(p.name) || (p.name === "children" && !parsed.selfClosing)) continue;
+          out.push({ offset: m.index, message: `<${comp.name}> is missing the required "${p.name}" prop`, suggestion: `Add ${p.name}${p.type ? ` (${p.type})` : ""}` });
+        }
+      }
+    }
+    return out;
+  },
+};
+
 export const RULES: Rule[] = [
   noHardcodedColor,
   noRawPaletteClass,
@@ -323,6 +440,7 @@ export const RULES: Rule[] = [
   fontFamily,
   radiusScale,
   imgAlt,
+  componentProps,
 ];
 
 export const RULE_IDS = RULES.map((r) => r.id);

@@ -1,10 +1,11 @@
-import type { ComponentEntry } from "@brandrail/engine";
+import type { ComponentEntry, PropSpec } from "@brandrail/engine";
+import kitProps from "@brandrail/kit/props.json";
 
 /**
  * Registry entries for the Midrocks UI kit (@brandrail/kit), used by "Import from UI kit".
  * Prop names match the kit's source in packages/kit/src/components.
  */
-export const KIT_REGISTRY: Array<Omit<ComponentEntry, "importPath">> = [
+const REGISTRY: Array<Omit<ComponentEntry, "importPath">> = [
   {
     name: "Button",
     replaces: ["button", "input[type=submit]", "input[type=button]"],
@@ -86,7 +87,14 @@ export const KIT_REGISTRY: Array<Omit<ComponentEntry, "importPath">> = [
     status: "stable",
   },
   { name: "Tooltip", aliases: ["Hint"], description: "Short help text on hover or focus.", status: "stable" },
-  { name: "Avatar", description: "User picture or initials with presence state.", status: "stable" },
+  { name: "Avatar", description: "User picture or initials with presence state. To show a name next to it, use AvatarLabel.", status: "stable" },
+  {
+    name: "AvatarLabel",
+    aliases: ["UserLabel", "ProfileName", "AvatarWithName"],
+    description: "Avatar with a name and optional caption beside it, e.g. the signed-in user or a person in a list.",
+    example: `<AvatarLabel initials="TB" name="Thiago Baptistella" caption="Engineer" />`,
+    status: "stable",
+  },
   { name: "AvatarGroup", description: "Stack of avatars with an overflow count.", status: "stable" },
   { name: "Breadcrumb", aliases: ["Trail"], description: "Shows where the page sits in the hierarchy.", status: "stable" },
   { name: "Divider", aliases: ["Separator"], description: "Horizontal or vertical rule, optionally labelled.", status: "stable" },
@@ -94,3 +102,17 @@ export const KIT_REGISTRY: Array<Omit<ComponentEntry, "importPath">> = [
   { name: "ProgressBar", aliases: ["Progress", "Meter"], description: "Determinate progress from 0 to 100.", status: "stable" },
   { name: "VideoPlayer", description: "Video with play, seek, volume and fullscreen controls.", status: "beta" },
 ];
+
+type KitPropsFile = Record<string, { props: PropSpec[]; htmlAttributes?: string }>;
+/** Props of every kit component, read from the kit's TypeScript source (packages/kit: pnpm run props). */
+export const KIT_PROPS = kitProps as KitPropsFile;
+
+export const KIT_REGISTRY: Array<Omit<ComponentEntry, "importPath">> = REGISTRY.map((c) => ({ ...c, ...KIT_PROPS[c.name] }));
+
+/**
+ * Fills in props for kit components that don't have them stored (registry rows imported before props existed),
+ * so AI tools and the Checker always see the kit's real props.
+ */
+export function withKitProps<T extends Pick<ComponentEntry, "name" | "importPath" | "props">>(components: T[]): T[] {
+  return components.map((c) => (!c.props?.length && c.importPath === "@brandrail/kit" && KIT_PROPS[c.name] ? { ...c, ...KIT_PROPS[c.name] } : c));
+}

@@ -2,7 +2,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { starterConfig, type BrandrailConfig } from "@brandrail/engine";
 import { bearer } from "@/lib/api-keys";
 import { isSupabaseConfigured } from "@/lib/env";
-import { KIT_REGISTRY } from "@/lib/kit-registry";
+import { KIT_REGISTRY, withKitProps } from "@/lib/kit-registry";
 import { createBrandrailMcp, type McpContext } from "@/lib/mcp/server";
 import { createSupabaseAnonClient } from "@/lib/supabase/anon";
 
@@ -43,9 +43,10 @@ async function authenticate(req: Request): Promise<McpContext | Response> {
   }
   const kit = data as KitRow;
   const published = Boolean(kit.tokenVersion);
+  const components = withKitProps(kit.components ?? []);
   const config: BrandrailConfig = published
-    ? { org: kit.slug, tokenVersion: kit.tokenVersion!, tokens: kit.tokens, components: kit.components }
-    : { ...starterConfig, components: kit.components?.length ? kit.components : starterConfig.components };
+    ? { org: kit.slug, tokenVersion: kit.tokenVersion!, tokens: kit.tokens, components }
+    : { ...starterConfig, components: components.length ? components : starterConfig.components };
 
   return {
     org: kit.org,
