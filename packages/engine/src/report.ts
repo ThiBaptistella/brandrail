@@ -1,7 +1,7 @@
 import { RULES } from "./rules.ts";
 import type { Report, Severity, Violation } from "./types.ts";
 
-const RENDERED_ONLY: Record<string, string> = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size" };
+const RENDERED_ONLY: Record<string, string> = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size", "page-rendered": "Blank page" };
 const title = (id: string) => RULES.find((r) => r.id === id)?.title ?? RENDERED_ONLY[id] ?? id;
 
 /* ---------------- terminal ---------------- */

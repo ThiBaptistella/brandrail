@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BrandKitEditor } from "@/components/brand-kit/editor";
 import { defaultBrandKit, fromDtcg, type BrandKitState } from "@/lib/brand-kit";
 import { isSupabaseConfigured } from "@/lib/env";
+import { listComponents } from "@/lib/data";
 import { requireOrg } from "@/lib/session";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -31,8 +32,10 @@ export default async function BrandKitPage() {
     }
   }
 
+  const { rows, sample } = await listComponents(org);
   return (
     <BrandKitEditor
+      components={sample ? [] : rows.map((r) => ({ name: r.name, importPath: r.importPath, status: r.status }))}
       orgName={org.name}
       initial={initial}
       version={version}

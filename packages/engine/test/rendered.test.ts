@@ -112,3 +112,9 @@ test("collector runs in a real browser", async (t) => {
     await browser.close();
   }
 });
+
+test("a blank page fails instead of scoring 100", () => {
+  const r = checkRendered([{ url: "http://localhost:5173/", nodes: [] }], { tokens });
+  assert.equal(r.violations[0]!.ruleId, "page-rendered");
+  assert.ok(r.score < 100);
+});

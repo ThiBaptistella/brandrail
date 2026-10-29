@@ -143,6 +143,7 @@ export const RENDERED_RULES = [
   { id: "font-family", title: "Off-brand font", description: "Rendered text must use the Brand Kit's font families.", defaultSeverity: "warning" as Severity },
   { id: "font-size-scale", title: "Off-scale font size", description: "Font sizes must come from the Brand Kit type scale.", defaultSeverity: "warning" as Severity },
   { id: "spacing-scale", title: "Off-scale spacing", description: "Padding and gaps must use the spacing scale.", defaultSeverity: "warning" as Severity },
+  { id: "page-rendered", title: "Blank page", description: "The page must render content; a blank or crashed page can't be checked.", defaultSeverity: "error" as Severity },
   { id: "radius-scale", title: "Off-scale radius", description: "Corner radius must use the radius scale.", defaultSeverity: "warning" as Severity },
 ];
 
@@ -304,6 +305,18 @@ export function checkRendered(pages: RenderedPage[], configInput: BrandrailConfi
     }
 
     const path = pagePath(page.url);
+    if (page.nodes.length < 5) {
+      // A blank page (crash, auth wall, client error) must not pass as "on-brand".
+      violations.push({
+        ruleId: "page-rendered",
+        severity: "error",
+        file: path,
+        line: 0,
+        column: 0,
+        message: `The page rendered ${page.nodes.length} visible element${page.nodes.length === 1 ? "" : "s"}, so there was nothing to check`,
+        suggestion: "Open it in a browser: it may have crashed, need a login (use --storage-state), or need longer to load (--wait).",
+      });
+    }
     for (const g of groups.values()) {
       violations.push({
         ruleId: g.ruleId,

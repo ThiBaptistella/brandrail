@@ -592,7 +592,7 @@ function makeIgnore(globs) {
 }
 
 // ../engine/src/check.ts
-var ENGINE_VERSION = "0.1.0";
+var ENGINE_VERSION = "0.2.0";
 var WEIGHT = { error: 4, warning: 1.5, info: 0.25 };
 function computeScore(counts, lines) {
   const penalty = counts.error * WEIGHT.error + counts.warning * WEIGHT.warning + counts.info * WEIGHT.info;
@@ -661,7 +661,7 @@ function check(files, configInput, opts = {}) {
 }
 
 // ../engine/src/report.ts
-var RENDERED_ONLY = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size" };
+var RENDERED_ONLY = { "text-contrast": "Low text contrast", "font-size-scale": "Off-scale font size", "page-rendered": "Blank page" };
 var title = (id) => RULES.find((r) => r.id === id)?.title ?? RENDERED_ONLY[id] ?? id;
 var esc = (s) => s.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
 var escProp = (s) => esc(s).replace(/:/g, "%3A").replace(/,/g, "%2C");

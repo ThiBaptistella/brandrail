@@ -8,6 +8,7 @@ import {
   formatPretty,
   diffTokens,
   generateInstructions,
+  generateTokensCss,
   importTokens,
   mcpClientConfigs,
   mergeTokens,
@@ -45,6 +46,7 @@ Options for init
   --no-rules             Don't write AGENTS.md (Codex), CLAUDE.md, Cursor, Copilot, Windsurf, Gemini rule files
   --mcp                  Also add the Brandrail MCP server to .mcp.json, .cursor/mcp.json, .vscode/mcp.json
                          and print the Codex / Windsurf config
+  --tokens-css <file>    Where to write the CSS variables (default src/brandrail.tokens.css); --no-tokens-css to skip
   --force                Overwrite an existing brandrail.config.json
 
 Options for scan
@@ -77,7 +79,7 @@ function parseArgs(argv: string[]): { cmd: string; positional: string[]; flags: 
       const [k, v] = a.slice(2).split("=", 2) as [string, string | undefined];
       const next = rest[i + 1];
       if (v !== undefined) flags[k] = v;
-      else if (next !== undefined && !next.startsWith("-") && ["config", "format", "fail-below", "changed", "pages", "storage-state", "wait", "width"].includes(k)) {
+      else if (next !== undefined && !next.startsWith("-") && ["config", "format", "fail-below", "changed", "pages", "storage-state", "wait", "width", "tokens-css"].includes(k)) {
         flags[k] = next;
         i++;
       } else flags[k] = true;
@@ -151,8 +153,20 @@ async function cmdCheck(cwd: string, positional: string[], flags: Flags): Promis
   return 0;
 }
 
-function writeRuleFiles(root: string, config: BrandrailConfig, org?: string): string[] {
-  const md = generateInstructions(config, { org });
+function tokensCssPath(root: string, config: BrandrailConfig, flags: Flags): string {
+  if (typeof flags["tokens-css"] === "string") return flags["tokens-css"];
+  if (config.tokensCss) return config.tokensCss;
+  return existsSync(join(root, "src")) ? "src/brandrail.tokens.css" : "brandrail.tokens.css";
+}
+
+function writeTokensCss(root: string, rel: string, config: BrandrailConfig, org?: string): void {
+  const abs = join(root, rel);
+  mkdirSync(dirname(abs), { recursive: true });
+  writeFileSync(abs, generateTokensCss(config.tokens, { version: config.tokenVersion, org }));
+}
+
+function writeRuleFiles(root: string, config: BrandrailConfig, org?: string, tokensCss?: string): string[] {
+  const md = generateInstructions(config, { org, tokensCss });
   const written: string[] = [];
   const write = (rel: string, content: (before: string) => string) => {
     const abs = join(root, rel);
@@ -222,11 +236,22 @@ async function cmdInit(cwd: string, flags: Flags): Promise<number> {
   if (existsSync(target) && !flags.force && !flags["from-api"]) {
     log(`${CONFIG_FILE} already exists (use --force to overwrite). Updating rule files from it.`);
     config = readConfig(target);
+    org ??= config.org;
   } else {
+    if (existsSync(target)) {
+      // Keep local settings (ignore, rules, tokensCss) when refreshing tokens from the API.
+      const prev = readConfig(target);
+      config = { ...prev, ...config, rules: { ...prev.rules, ...config.rules }, ignore: prev.ignore ?? config.ignore, tokensCss: prev.tokensCss };
+    }
     writeFileSync(target, `${JSON.stringify(config, null, 2)}\n`);
     log(`✔ wrote ${CONFIG_FILE}${org ? ` from ${org}'s Brand Kit` : " (starter tokens — edit them or use --from-api)"}`);
   }
-  if (flags.rules !== false) for (const f of writeRuleFiles(cwd, config, org)) log(`✔ updated ${f}`);
+  const css = flags["tokens-css"] === false ? undefined : tokensCssPath(cwd, config, flags);
+  if (css) {
+    writeTokensCss(cwd, css, config, org);
+    log(`✔ wrote ${css}  (the Brand Kit as CSS variables — import it once at your app entry)`);
+  }
+  if (flags.rules !== false) for (const f of writeRuleFiles(cwd, config, org, css)) log(`✔ updated ${f}`);
   if (flags.mcp) writeMcpConfigs(cwd);
   log("\nNext: npx brandrail check");
   return 0;

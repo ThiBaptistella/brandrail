@@ -1,3 +1,4 @@
+import { flattenTokens } from "./tokens.ts";
 import { resolveConfig } from "./config.ts";
 import { RULES } from "./rules.ts";
 import type { BrandrailConfig } from "./types.ts";
@@ -9,7 +10,7 @@ export const RULES_END = "<!-- brandrail:end -->";
  * Markdown instructions for AI coding tools (CLAUDE.md, AGENTS.md, Cursor rules, Copilot instructions).
  * Generated from the Brand Kit so every tool gets the same, current rules.
  */
-export function generateInstructions(config: BrandrailConfig, opts: { org?: string } = {}): string {
+export function generateInstructions(config: BrandrailConfig, opts: { org?: string; tokensCss?: string } = {}): string {
   const r = resolveConfig(config);
   const lines: string[] = [];
   lines.push(`# Design system rules${opts.org ? ` — ${opts.org}` : ""}`);
@@ -18,6 +19,11 @@ export function generateInstructions(config: BrandrailConfig, opts: { org?: stri
     `All UI in this repo must follow the Brand Kit${r.tokenVersion ? ` (v${r.tokenVersion})` : ""}. These rules are checked on every pull request by Brandrail.`,
   );
   lines.push("");
+  if (opts.tokensCss) {
+    lines.push("## Setup");
+    lines.push(`- \`${opts.tokensCss}\` defines every CSS variable below (light and dark). Import it once at the app entry, before other styles. Don't edit it: it's generated from the Brand Kit.`);
+    lines.push("");
+  }
   if (r.components.length) {
     lines.push("## Components");
     lines.push("Always use these components. Never re-create them with raw HTML elements:");
@@ -38,8 +44,16 @@ export function generateInstructions(config: BrandrailConfig, opts: { org?: stri
     lines.push("");
   }
   lines.push("## Spacing, radius and type");
-  lines.push(`- Spacing (padding, margin, gap) must be one of: ${r.spacing.filter((s) => s > 2).map((s) => `${s}px`).join(", ")}.`);
-  lines.push(`- Corner radius must be one of: ${r.radii.filter((x) => x > 0 && x < 999).map((x) => `${x}px`).join(", ")} (or fully rounded).`);
+  const named = (prefix: RegExp) =>
+    flattenTokens(config.tokens)
+      .filter((t) => prefix.test(t.path))
+      .map((t) => `\`var(--${t.path.replace(/\./g, "-")})\` ${t.value}`);
+  const spaceVars = named(/^(space|spacing)\./);
+  const radiusVars = named(/^radius\./);
+  const sizeVars = named(/^font\.size\./);
+  lines.push(`- Spacing (padding, margin, gap) must be one of: ${r.spacing.filter((s) => s > 2).map((s) => `${s}px`).join(", ")}.${spaceVars.length ? ` Prefer the variables: ${spaceVars.join(", ")}.` : ""}`);
+  lines.push(`- Corner radius must be one of: ${r.radii.filter((x) => x > 0 && x < 999).map((x) => `${x}px`).join(", ")} (or fully rounded).${radiusVars.length ? ` Variables: ${radiusVars.join(", ")}.` : ""}`);
+  if (sizeVars.length) lines.push(`- Font sizes come from the type scale: ${sizeVars.join(", ")}. Matching line heights are \`--font-line-height-*\`.`);
   if (r.fonts.length) lines.push(`- Fonts: use ${r.fontVars.map((v) => `\`var(${v})\``).join(" or ")}; never set another font-family.`);
   lines.push("");
   lines.push("## Before you finish");

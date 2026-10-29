@@ -35,6 +35,8 @@ export interface BrandrailConfig {
   ignore?: string[];
   /** Packages that must not be imported, e.g. other UI libraries. */
   forbiddenImports?: string[];
+  /** Where `brandrail init` writes the Brand Kit as CSS variables. Default src/brandrail.tokens.css (or brandrail.tokens.css without src/). */
+  tokensCss?: string;
   /** ΔE distance under which a colour counts as "the same" as a token. Default 2.5. */
   colorTolerance?: number;
 }

@@ -45,3 +45,4 @@ export {
   type RenderedPage,
   type RenderedCheckOptions,
 } from "./rendered.ts";
+export { generateTokensCss } from "./tokens-css.ts";

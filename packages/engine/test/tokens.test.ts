@@ -192,3 +192,15 @@ test("translucent tokens don't match opaque colours", () => {
     ["warning", "Use var(--color-disabled) so it follows Brand Kit updates"],
   ]);
 });
+
+test("generateTokensCss writes variables with dark overrides", async () => {
+  const { generateTokensCss } = await import("../src/index.ts");
+  const css = generateTokensCss(
+    { color: { canvas: { $type: "color", $value: "#ffffff", $extensions: { "dev.brandrail": { modes: { dark: "#0d1117" } } } } }, space: { 2: { $type: "dimension", $value: "8px" } } },
+    { version: "1.3.0", org: "Acme" },
+  );
+  assert.match(css, /:root \{\n  --color-canvas: #ffffff;\n  --space-2: 8px;\n\}/);
+  assert.match(css, /\[data-theme="dark"\] \{\n  --color-canvas: #0d1117;/);
+  assert.match(css, /Acme Brand Kit v1\.3\.0/);
+  assert.match(generateInstructions({ tokens: {} }, { tokensCss: "src/brandrail.tokens.css" }), /`src\/brandrail\.tokens\.css` defines every CSS variable/);
+});

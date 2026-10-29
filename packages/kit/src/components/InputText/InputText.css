@@ -6,17 +6,26 @@
 
   &.small {
     gap: var(--spacing4);
-    height: 36px;
+    /* The input box has the fixed height; the container grows with the label and caption. */
+    & .input-wrapper {
+      height: 36px;
+    }
   }
 
   &.medium {
     gap: var(--spacing5);
-    height: 44px;
+    /* The input box has the fixed height; the container grows with the label and caption. */
+    & .input-wrapper {
+      height: 44px;
+    }
   }
 
   &.large {
     gap: var(--spacing7);
-    height: 56px;
+    /* The input box has the fixed height; the container grows with the label and caption. */
+    & .input-wrapper {
+      height: 56px;
+    }
   }
 
   /* Label */

@@ -34,6 +34,7 @@ import {
   type ColorToken,
   type ScaleStep,
 } from "@/lib/brand-kit";
+import { KitGallery, type GalleryComponent } from "@/components/kit-gallery";
 import { ImportDialog, type AppliedImport } from "./import-dialog";
 
 const FONT_PRESETS = [
@@ -61,13 +62,16 @@ export function BrandKitEditor({
   version,
   publishedAt,
   canPublish,
+  components = [],
 }: {
   orgName: string;
   initial: BrandKitState;
   version: string | null;
   publishedAt: string | null;
   canPublish: boolean;
+  components?: GalleryComponent[];
 }) {
+  const [previewTab, setPreviewTab] = useState<"app" | "components">("app");
   const [section, setSection] = useState<Section>("Colours");
   const [kit, setKit] = useState<BrandKitState>(initial);
   const [base, setBase] = useState<BrandKitState>(initial);
@@ -211,8 +215,26 @@ export function BrandKitEditor({
         <div className="min-w-0 xl:sticky xl:top-4 xl:self-start">
           <Box>
             <BoxHeader className="justify-between">
-              <h2 className="text-[13px] font-medium text-fg">Live preview</h2>
-              <div className="flex gap-1">
+              <div className="flex gap-1" role="tablist" aria-label="Preview">
+                {(
+                  [
+                    ["app", "Sample app"],
+                    ["components", "Components"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={previewTab === id}
+                    onClick={() => setPreviewTab(id)}
+                    className={cn("rounded-md px-2.5 py-1 text-xs font-medium", previewTab === id ? "bg-btn-hover text-fg" : "text-fg-muted hover:text-fg")}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className={cn("flex gap-1", previewTab !== "app" && "hidden")}>
                 <Button size="sm" variant="invisible" aria-label="Light" aria-pressed={!dark} onClick={() => setDark(false)} className={!dark ? "bg-btn-hover" : ""}><SunIcon size={14} /></Button>
                 <Button size="sm" variant="invisible" aria-label="Dark" aria-pressed={dark} onClick={() => setDark(true)} className={dark ? "bg-btn-hover" : ""}><MoonIcon size={14} /></Button>
                 <span className="mx-1 w-px bg-line" />
@@ -220,7 +242,11 @@ export function BrandKitEditor({
                 <Button size="sm" variant="invisible" aria-label="Mobile" aria-pressed={mobile} onClick={() => setMobile(true)} className={mobile ? "bg-btn-hover" : ""}><DeviceMobileIcon size={14} /></Button>
               </div>
             </BoxHeader>
-            <Preview kit={kit} dark={dark} mobile={mobile} />
+            {previewTab === "app" ? (
+              <Preview kit={kit} dark={dark} mobile={mobile} />
+            ) : (
+              <KitGallery brandKit={kit} brandKitLabel={dirty ? "Brand Kit (draft)" : `Brand Kit${version ? ` v${version}` : ""}`} components={components} embedded />
+            )}
           </Box>
         </div>
       </div>
