@@ -2,7 +2,7 @@
  * Brand Kit editor state <-> W3C DTCG token document stored in token_set_versions.tokens.
  * Pure functions: used by the server (load/publish) and the client editor (import, export, diff).
  */
-import { buildDtcg, flattenTokens, type FlatToken, type TokenType } from "@brandrail/engine";
+import { buildDtcg, flattenTokens, pickColorRoles, type ColorRole, type FlatToken, type TokenType } from "@brandrail/engine";
 
 export type ColorToken = { id: string; path: string; value: string; dark?: string; note: string };
 export type ScaleStep = { id: string; name: string; value: number };
@@ -210,43 +210,10 @@ export function validateKit(s: BrandKitState): string | null {
 
 /* ───────── roles: which token plays which part, for the preview and contrast checks ───────── */
 
-export type Role = "canvas" | "subtle" | "fg" | "muted" | "border" | "primary" | "accent" | "danger";
-
-const ROLE_PATTERNS: Record<Role, RegExp[]> = {
-  canvas: [/canvas\.default$/, /^color\.(bg|background)(\.default)?$/, /surface(\.1|\.default)?$/, /canvas$/, /(bg|background)/],
-  subtle: [/canvas\.subtle$/, /(bg|background)\.subtle$/, /surface\.2$/, /fill\.1$/, /subtle$/],
-  fg: [/fg\.default$/, /text\.(default|primary|dark-primary)$/, /^color\.(fg|text|foreground)$/, /fg|text/],
-  muted: [/fg\.muted$/, /text\.(muted|secondary|dark-secondary)$/, /muted|secondary/],
-  border: [/border\.default$/, /^color\.(base\.)?border$/, /border/],
-  primary: [/action\.primary$/, /^color\.(brand\.)?primary$/, /brand(-active)?$/, /primary/, /brand/],
-  accent: [/accent(\.default)?$/, /link/, /info/, /accent/],
-  danger: [/danger(\.default|-active)?$/, /error/, /danger/],
-};
-const ROLE_FALLBACK: Record<Role, [string, string]> = {
-  canvas: ["#ffffff", "#0d1117"],
-  subtle: ["#f6f8fa", "#151b23"],
-  fg: ["#1f2328", "#f0f6fc"],
-  muted: ["#59636e", "#9198a1"],
-  border: ["#d1d9e0", "#3d444d"],
-  primary: ["#1f883d", "#238636"],
-  accent: ["#0969da", "#4493f8"],
-  danger: ["#cf222e", "#f85149"],
-};
+export type Role = ColorRole;
 
 export function pickRoles(colors: ColorToken[], dark = false): Record<Role, { value: string; path?: string }> {
-  const out = {} as Record<Role, { value: string; path?: string }>;
-  for (const role of Object.keys(ROLE_PATTERNS) as Role[]) {
-    let hit: ColorToken | undefined;
-    for (const re of ROLE_PATTERNS[role]) {
-      hit = colors.find((c) => re.test(c.path) && HEX.test(c.value));
-      if (hit) break;
-    }
-    const fb = ROLE_FALLBACK[role][dark ? 1 : 0];
-    out[role] = hit ? { value: (dark ? hit.dark : undefined) ?? (dark && !hit.dark ? fb : hit.value), path: hit.path } : { value: fb };
-    // Without a dark value, keep brand colours (primary/accent/danger) and swap neutrals.
-    if (dark && hit && !hit.dark && (role === "primary" || role === "accent" || role === "danger")) out[role] = { value: hit.value, path: hit.path };
-  }
-  return out;
+  return pickColorRoles(colors, dark);
 }
 
 export const cssVar = (path: string) => `--${path.replace(/\./g, "-")}`;

@@ -9,6 +9,7 @@ import {
   diffTokens,
   generateInstructions,
   generateTokensCss,
+  kitBridgeCss,
   importTokens,
   mcpClientConfigs,
   mergeTokens,
@@ -159,10 +160,15 @@ function tokensCssPath(root: string, config: BrandrailConfig, flags: Flags): str
   return existsSync(join(root, "src")) ? "src/brandrail.tokens.css" : "brandrail.tokens.css";
 }
 
-function writeTokensCss(root: string, rel: string, config: BrandrailConfig, org?: string): void {
+function writeTokensCss(root: string, rel: string, config: BrandrailConfig, org?: string): boolean {
   const abs = join(root, rel);
   mkdirSync(dirname(abs), { recursive: true });
-  writeFileSync(abs, generateTokensCss(config.tokens, { version: config.tokenVersion, org }));
+  let css = generateTokensCss(config.tokens, { version: config.tokenVersion, org });
+  // Registry uses the Brandrail UI kit: make its components follow the Brand Kit too.
+  const usesKit = (config.components ?? []).some((c) => c.importPath === "@brandrail/kit");
+  if (usesKit) css += `\n/* @brandrail/kit follows the Brand Kit: colours, font, spacing, radius and type scale. */\n${kitBridgeCss(config.tokens)}\n`;
+  writeFileSync(abs, css);
+  return usesKit;
 }
 
 function writeRuleFiles(root: string, config: BrandrailConfig, org?: string, tokensCss?: string): string[] {
@@ -248,8 +254,8 @@ async function cmdInit(cwd: string, flags: Flags): Promise<number> {
   }
   const css = flags["tokens-css"] === false ? undefined : tokensCssPath(cwd, config, flags);
   if (css) {
-    writeTokensCss(cwd, css, config, org);
-    log(`✔ wrote ${css}  (the Brand Kit as CSS variables — import it once at your app entry)`);
+    const kit = writeTokensCss(cwd, css, config, org);
+    log(`✔ wrote ${css}  (the Brand Kit as CSS variables${kit ? ", and @brandrail/kit themed from it" : ""} — import it once at your app entry)`);
   }
   if (flags.rules !== false) for (const f of writeRuleFiles(cwd, config, org, css)) log(`✔ updated ${f}`);
   if (flags.mcp) writeMcpConfigs(cwd);

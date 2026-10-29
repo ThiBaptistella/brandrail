@@ -204,3 +204,24 @@ test("generateTokensCss writes variables with dark overrides", async () => {
   assert.match(css, /Acme Brand Kit v1\.3\.0/);
   assert.match(generateInstructions({ tokens: {} }, { tokensCss: "src/brandrail.tokens.css" }), /`src\/brandrail\.tokens\.css` defines every CSS variable/);
 });
+
+test("kitBridgeCss maps the Brand Kit onto the kit's variables", async () => {
+  const { kitBridgeCss } = await import("../src/index.ts");
+  const tokens = {
+    color: {
+      action: { primary: { $type: "color", $value: "#d1242f" } },
+      canvas: { default: { $type: "color", $value: "#ffffff", $extensions: { "dev.brandrail": { modes: { dark: "#0d1117" } } } } },
+    },
+    font: { family: { sans: { $type: "fontFamily", $value: "Georgia, serif" } }, size: { sm: { $type: "dimension", $value: "13px" }, base: { $type: "dimension", $value: "15px" } } },
+    space: { 1: { $type: "dimension", $value: "4px" }, 2: { $type: "dimension", $value: "8px" }, 3: { $type: "dimension", $value: "16px" } },
+    radius: { sm: { $type: "dimension", $value: "2px" }, md: { $type: "dimension", $value: "12px" } },
+  };
+  const global = kitBridgeCss(tokens);
+  assert.match(global, /^html:root \{/);
+  assert.match(global, /--spacing6: 8px;/, "kit 10px snaps to the 8px step");
+  assert.match(global, /--defaultRadius-rad3: 12px;/, "kit md radius follows the Brand Kit md");
+  assert.match(global, /--fontA-fontSizeSm: 13px;/);
+  assert.match(global, /html:root, html:root :is\(\.brandrail, \.themeA, \.themeB\)\.light \{[^}]*--stateBrandActive: #d1242f;[^}]*--fontA-fontFamily: Georgia, serif;/);
+  assert.match(global, /\.dark \{[^}]*--baseSurface1: #0d1117;/);
+  assert.match(kitBridgeCss(tokens, { scope: "#x" }), /^#x \{/m);
+});

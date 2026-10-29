@@ -46,3 +46,4 @@ export {
   type RenderedCheckOptions,
 } from "./rendered.ts";
 export { generateTokensCss } from "./tokens-css.ts";
+export { kitBridgeCss, pickColorRoles, type ColorRole } from "./kit-bridge.ts";

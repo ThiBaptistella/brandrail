@@ -23,7 +23,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "bin": {
-    "brandrail": "./dist/brandrail.mjs"
+    "brandrail": "dist/brandrail.mjs"
   },
   "files": [
     "dist",
@@ -36,7 +36,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --external:playwright --external:playwright-core --banner:js='#!/usr/bin/env node'",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --format=esm --outfile=dist/brandrail.mjs --external:playwright --external:playwright-core --banner:js='#!/usr/bin/env node' && chmod +x dist/brandrail.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm run build"
   },
